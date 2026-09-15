@@ -172,8 +172,17 @@ async function main() {
   console.log(`  media:   ${copied.length ? copied.join(', ') : 'none'}`);
   if (missing.length) console.log(`  MISSING: ${missing.join(', ')} (re-upload in the admin area)`);
   if (siteUrl) console.log(`  meta:    canonical and social tags use ${siteUrl}`);
-  else console.log('  meta:    pass your URL to add canonical/social tags, e.g. npm run export -- https://you.pages.dev');
-  console.log('\nPublish it:  npx wrangler@4 pages deploy dist');
+  else console.log('  meta:    pass your URL to add canonical/social tags, e.g. npm run export -- https://you.workers.dev');
+
+  // A Wrangler config means the project is already wired up, so show the short command.
+  const configured = ['wrangler.jsonc', 'wrangler.json', 'wrangler.toml'].some((file) =>
+    fs.existsSync(path.join(config.root, file)),
+  );
+  console.log(
+    configured
+      ? '\nPublish it:  npx wrangler deploy'
+      : '\nPublish it:  drag dist/ into the Cloudflare dashboard, or npx wrangler deploy dist',
+  );
 }
 
 main().catch((error) => {

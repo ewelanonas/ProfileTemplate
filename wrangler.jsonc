@@ -1,0 +1,18 @@
+{
+  // Cloudflare Workers config for publishing the static export.
+  //
+  // The dashboard's "upload assets" flow creates a Worker serving static assets,
+  // which is why the site lives on *.workers.dev rather than *.pages.dev. There is
+  // no Worker script here: Cloudflare just serves the files in dist/.
+  //
+  // Publish with:  npm run export -- https://YOUR-URL  &&  npx wrangler deploy
+  //
+  // Using this repo for your own site? Change "name" to your project name.
+  "name": "emmanuel-anonas",
+  "compatibility_date": "2026-09-15",
+  "assets": {
+    "directory": "./dist",
+    // Serve dist/404.html for paths that do not exist.
+    "not_found_handling": "404-page"
+  }
+}
