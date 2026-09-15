@@ -1,0 +1,231 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <title>Admin · Portfolio</title>
+    <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+    <link rel="stylesheet" href="/assets/css/admin.css" />
+  </head>
+  <body class="admin-body">
+    <!-- ---------------- Login ---------------- -->
+    <section class="login" id="login-view" hidden>
+      <form class="login__card" id="login-form" autocomplete="on" novalidate>
+        <span class="brand__mark" aria-hidden="true"></span>
+        <h1 class="login__title">Admin sign in</h1>
+        <p class="login__hint">This area is private. Only your account can edit the site.</p>
+
+        <label class="field">
+          <span class="field__label">Username</span>
+          <input
+            class="field__input"
+            id="login-username"
+            name="username"
+            type="text"
+            autocomplete="username"
+            required
+            autocapitalize="none"
+            spellcheck="false"
+          />
+        </label>
+
+        <label class="field">
+          <span class="field__label">Password</span>
+          <span class="field__with-button">
+            <input
+              class="field__input"
+              id="login-password"
+              name="password"
+              type="password"
+              autocomplete="current-password"
+              required
+            />
+            <button class="field__reveal" id="toggle-password" type="button" aria-label="Show password">👁</button>
+          </span>
+        </label>
+
+        <p class="login__error" id="login-error" role="alert" hidden></p>
+
+        <button class="btn btn--primary login__submit" id="login-submit" type="submit">Sign in</button>
+        <a class="login__back" href="/">← Back to the site</a>
+      </form>
+    </section>
+
+    <!-- ---------------- Dashboard ---------------- -->
+    <div class="admin" id="admin-view" hidden>
+      <header class="admin__bar">
+        <div class="admin__brand">
+          <span class="brand__mark" aria-hidden="true"></span>
+          <div>
+            <p class="admin__title">Portfolio admin</p>
+            <p class="admin__user">Signed in as <strong id="admin-user"></strong></p>
+          </div>
+        </div>
+
+        <div class="admin__bar-actions">
+          <span class="pill" id="dirty-flag" hidden>Unsaved changes</span>
+          <a class="btn btn--ghost btn--sm" href="/" target="_blank" rel="noopener">View site ↗</a>
+          <button class="btn btn--primary btn--sm" id="save-button" type="button">Save changes</button>
+          <button class="btn btn--ghost btn--sm" id="logout-button" type="button">Sign out</button>
+        </div>
+      </header>
+
+      <div class="admin__layout">
+        <nav class="admin__tabs" aria-label="Editor sections">
+          <button class="tab is-active" type="button" data-tab="media">🖼 Photo, CV &amp; background</button>
+          <button class="tab" type="button" data-tab="basics">👤 Basics</button>
+          <button class="tab" type="button" data-tab="skills">🛠 Skills</button>
+          <button class="tab" type="button" data-tab="experience">💼 Experience</button>
+          <button class="tab" type="button" data-tab="projects">🚀 Projects</button>
+          <button class="tab" type="button" data-tab="education">🎓 Education &amp; certificates</button>
+          <button class="tab" type="button" data-tab="extras">🌍 Languages &amp; interests</button>
+          <button class="tab" type="button" data-tab="appearance">🎨 Appearance</button>
+        </nav>
+
+        <main class="admin__panels">
+          <!-- Media -->
+          <section class="panel is-active" data-panel="media" aria-label="Media uploads">
+            <header class="panel__head">
+              <h2>Photo, CV &amp; background</h2>
+              <p>Uploads save immediately. Everything else on the other tabs saves with the Save button.</p>
+            </header>
+
+            <div class="uploads">
+              <article class="upload" data-kind="photo">
+                <h3 class="upload__title">Profile photo</h3>
+                <p class="upload__hint" data-hint>JPG, PNG or WebP</p>
+                <div class="upload__preview upload__preview--square">
+                  <img data-preview alt="Current profile photo" hidden />
+                  <span class="upload__empty" data-empty>No photo yet</span>
+                </div>
+                <div class="upload__drop" data-drop tabindex="0" role="button" aria-label="Choose or drop a profile photo">
+                  <strong>Click to choose</strong> or drag a file here
+                </div>
+                <input type="file" data-input accept="image/jpeg,image/png,image/webp" hidden />
+                <div class="upload__actions">
+                  <button class="btn btn--ghost btn--sm" type="button" data-pick>Choose file</button>
+                  <button class="btn btn--danger btn--sm" type="button" data-remove hidden>Remove</button>
+                </div>
+                <progress class="upload__progress" data-progress max="100" value="0" hidden></progress>
+              </article>
+
+              <article class="upload" data-kind="background">
+                <h3 class="upload__title">Hero background</h3>
+                <p class="upload__hint" data-hint>JPG, PNG or WebP — wide images work best</p>
+                <div class="upload__preview upload__preview--wide">
+                  <img data-preview alt="Current background image" hidden />
+                  <span class="upload__empty" data-empty>No background yet</span>
+                </div>
+                <div class="upload__drop" data-drop tabindex="0" role="button" aria-label="Choose or drop a background image">
+                  <strong>Click to choose</strong> or drag a file here
+                </div>
+                <input type="file" data-input accept="image/jpeg,image/png,image/webp" hidden />
+                <div class="upload__actions">
+                  <button class="btn btn--ghost btn--sm" type="button" data-pick>Choose file</button>
+                  <button class="btn btn--danger btn--sm" type="button" data-remove hidden>Remove</button>
+                </div>
+                <progress class="upload__progress" data-progress max="100" value="0" hidden></progress>
+              </article>
+
+              <article class="upload" data-kind="cv">
+                <h3 class="upload__title">CV / résumé</h3>
+                <p class="upload__hint" data-hint>PDF or DOCX</p>
+                <div class="upload__preview upload__preview--file">
+                  <span class="upload__file" data-file hidden></span>
+                  <span class="upload__empty" data-empty>No CV yet</span>
+                </div>
+                <div class="upload__drop" data-drop tabindex="0" role="button" aria-label="Choose or drop your CV file">
+                  <strong>Click to choose</strong> or drag a file here
+                </div>
+                <input type="file" data-input accept="application/pdf,.pdf,.docx" hidden />
+                <div class="upload__actions">
+                  <button class="btn btn--ghost btn--sm" type="button" data-pick>Choose file</button>
+                  <a class="btn btn--ghost btn--sm" href="/cv" target="_blank" rel="noopener" data-open hidden>Open ↗</a>
+                  <button class="btn btn--danger btn--sm" type="button" data-remove hidden>Remove</button>
+                </div>
+                <progress class="upload__progress" data-progress max="100" value="0" hidden></progress>
+              </article>
+            </div>
+          </section>
+
+          <!-- Basics -->
+          <section class="panel" data-panel="basics" aria-label="Basic details" hidden>
+            <header class="panel__head">
+              <h2>Basics</h2>
+              <p>The headline block at the top of your site, plus your contact details.</p>
+            </header>
+            <div class="grid grid--2" id="basics-fields"></div>
+            <div id="socials-editor" class="repeater"></div>
+          </section>
+
+          <!-- Skills -->
+          <section class="panel" data-panel="skills" aria-label="Skills" hidden>
+            <header class="panel__head">
+              <h2>Skills</h2>
+              <p>Group your skills by category. One skill per line inside each group.</p>
+            </header>
+            <div id="skills-editor" class="repeater"></div>
+          </section>
+
+          <!-- Experience -->
+          <section class="panel" data-panel="experience" aria-label="Experience" hidden>
+            <header class="panel__head">
+              <h2>Experience</h2>
+              <p>Newest role first. Achievements go one per line.</p>
+            </header>
+            <div id="experience-editor" class="repeater"></div>
+          </section>
+
+          <!-- Projects -->
+          <section class="panel" data-panel="projects" aria-label="Projects" hidden>
+            <header class="panel__head">
+              <h2>Projects</h2>
+              <p>Featured projects get a highlighted card on the site.</p>
+            </header>
+            <div id="projects-editor" class="repeater"></div>
+          </section>
+
+          <!-- Education -->
+          <section class="panel" data-panel="education" aria-label="Education and certifications" hidden>
+            <header class="panel__head">
+              <h2>Education &amp; certificates</h2>
+              <p>Degrees, courses and any certifications worth showing.</p>
+            </header>
+            <div id="education-editor" class="repeater"></div>
+            <div id="certifications-editor" class="repeater"></div>
+          </section>
+
+          <!-- Extras -->
+          <section class="panel" data-panel="extras" aria-label="Languages and interests" hidden>
+            <header class="panel__head">
+              <h2>Languages &amp; interests</h2>
+              <p>Optional, but they make the profile feel human.</p>
+            </header>
+            <div id="languages-editor" class="repeater"></div>
+            <div class="grid" id="interests-fields"></div>
+          </section>
+
+          <!-- Appearance -->
+          <section class="panel" data-panel="appearance" aria-label="Appearance" hidden>
+            <header class="panel__head">
+              <h2>Appearance</h2>
+              <p>Accent colour and the default theme visitors see first.</p>
+            </header>
+            <div class="grid grid--2" id="appearance-fields"></div>
+          </section>
+        </main>
+      </div>
+
+      <div class="admin__savebar">
+        <span id="save-status" class="admin__status">All changes saved</span>
+        <button class="btn btn--primary" id="save-button-2" type="button">Save changes</button>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/assets/js/admin.js" defer></script>
+  </body>
+</html>

@@ -1,0 +1,26 @@
+{
+  "name": "profile-portfolio",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Personal portfolio and CV website with a private admin area for editing content and uploading photo, background and CV.",
+  "main": "src/server.js",
+  "engines": {
+    "node": ">=20.0.0"
+  },
+  "scripts": {
+    "start": "node src/server.js",
+    "dev": "node --watch src/server.js",
+    "setup": "node scripts/setup.js",
+    "hash-password": "node scripts/hash-password.js",
+    "check": "node --check src/server.js && node scripts/check-syntax.js"
+  },
+  "dependencies": {
+    "bcryptjs": "3.0.3",
+    "cookie-session": "2.1.1",
+    "dotenv": "17.4.2",
+    "express": "5.2.1",
+    "express-rate-limit": "8.7.0",
+    "helmet": "8.3.0",
+    "multer": "2.4.0"
+  }
+}

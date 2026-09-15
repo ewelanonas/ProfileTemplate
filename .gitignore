@@ -1,0 +1,23 @@
+# dependencies
+node_modules/
+
+# secrets and local config
+.env
+.env.*
+!.env.example
+
+# runtime data (user content, never committed)
+data/
+uploads/
+sessions/
+
+# logs
+*.log
+npm-debug.log*
+
+# OS / editor noise
+.DS_Store
+Thumbs.db
+
+# editor workspace settings
+.vscode/

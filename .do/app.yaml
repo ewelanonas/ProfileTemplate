@@ -1,0 +1,71 @@
+# DigitalOcean App Platform spec.
+#
+# IMPORTANT: App Platform containers have an ephemeral filesystem. Anything you
+# upload through the admin area (photo, background, CV) and the profile.json
+# content are wiped on every redeploy or restart.
+#
+# Use this spec if you are happy to re-upload after each deploy. For content that
+# has to persist, deploy with Docker on a Droplet instead (see DEPLOY.md), which
+# keeps data and uploads in volumes.
+#
+# Replace REPLACE_WITH_REPO_NAME before using, then:
+#   doctl apps create --spec .do/app.yaml
+
+name: profile-portfolio
+region: sgp
+features:
+  - buildpack-stack=ubuntu-22
+
+services:
+  - name: web
+    instance_count: 1
+    instance_size_slug: apps-s-1vcpu-0.5gb
+    http_port: 8080
+
+    github:
+      repo: ewelanonas/REPLACE_WITH_REPO_NAME
+      branch: main
+      deploy_on_push: true
+
+    run_command: npm start
+
+    health_check:
+      http_path: /api/health
+      initial_delay_seconds: 10
+      period_seconds: 30
+
+    envs:
+      - key: NODE_ENV
+        scope: RUN_TIME
+        value: production
+      - key: PORT
+        scope: RUN_TIME
+        value: "8080"
+      # App Platform terminates TLS for you, so secure cookies are required.
+      - key: COOKIE_SECURE
+        scope: RUN_TIME
+        value: "true"
+      - key: SITE_URL
+        scope: RUN_TIME
+        value: ${APP_URL}
+      - key: DATA_DIR
+        scope: RUN_TIME
+        value: /workspace/data
+      - key: UPLOAD_DIR
+        scope: RUN_TIME
+        value: /workspace/uploads
+
+      # ---- Secrets: set the real values in the DigitalOcean dashboard or with
+      # ---- `doctl apps update`. Never commit them to git.
+      - key: ADMIN_USERNAME
+        scope: RUN_TIME
+        type: SECRET
+        value: YOUR_ADMIN_USERNAME_HERE
+      - key: ADMIN_PASSWORD_HASH
+        scope: RUN_TIME
+        type: SECRET
+        value: YOUR_BCRYPT_HASH_HERE
+      - key: SESSION_SECRET
+        scope: RUN_TIME
+        type: SECRET
+        value: YOUR_LONG_RANDOM_SESSION_SECRET_HERE
