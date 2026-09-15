@@ -207,6 +207,7 @@ fastest way to lock out a session you are unsure about.
 | Background image | `uploads/background/` |
 | CV file | `uploads/cv/` |
 | Credentials and settings | `.env` |
+| Static build output | `dist/` (created by `npm run export`) |
 
 All four are git-ignored — your personal details, CV and photos never end up in the
 repository, even though the repository is public.
@@ -228,6 +229,7 @@ Compress-Archive -Path .\data, .\uploads, .\.env -DestinationPath ..\portfolio-b
 | `npm run dev` | Runs the site and restarts on file changes |
 | `npm run setup` | Creates or replaces `.env` with your admin credentials |
 | `npm run hash-password` | Prints a bcrypt hash for a new password |
+| `npm run export` | Builds `dist/`, a static copy of your site ready to publish |
 | `npm run check` | Parses every JS file to catch syntax errors |
 
 ---
@@ -266,9 +268,19 @@ Trade-off: you edit locally and publish, instead of editing from any browser. Fo
 portfolio that changes a few times a year, that is a small price for a link that is always
 instant.
 
-> This route needs one small addition that is **not in the repository yet**: an
-> `npm run export` command that turns your current content into a publishable `dist/`
-> folder. Ask for it and it can be added.
+Three commands publish it:
+
+```powershell
+npm run export -- https://your-project.pages.dev
+npx wrangler@4 pages deploy dist --project-name=YOUR-PROJECT-NAME
+```
+
+`npm run export` writes `dist/`: the page with your name and social preview tags baked in,
+your content as `profile.json`, and only the photo, background and CV your profile actually
+points at. Old files you replaced are never published, and the admin area is left out
+because it cannot work without the server. `dist/` is git-ignored, so your CV and photos are
+published without ever entering the repository. Full walkthrough in
+[DEPLOY.md](DEPLOY.md), Option D.
 
 ### Oracle Cloud Always Free — a real server, free
 

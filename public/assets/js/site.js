@@ -5,6 +5,17 @@
   const $ = (selector, scope = document) => scope.querySelector(selector);
   const $$ = (selector, scope = document) => Array.from(scope.querySelectorAll(selector));
 
+  /**
+   * Where the profile comes from.
+   *
+   * Served by the Node app: the API. Published as a static export: a JSON file
+   * next to the page, with the script tag carrying its path. Static builds have
+   * no /cv route either, so the download button points straight at the file.
+   */
+  const staticSource = (document.querySelector('script[data-profile]') || { dataset: {} }).dataset.profile;
+  const PROFILE_URL = staticSource || '/api/profile';
+  const IS_STATIC = Boolean(staticSource);
+
   /* ---------- helpers ---------- */
 
   /** Builds an element and sets text through textContent, so profile data is never parsed as HTML. */
@@ -193,9 +204,15 @@
     }
 
     const hasCv = Boolean(media.cv);
+    const cvHref = IS_STATIC ? safeHref(media.cv) : '/cv';
     ['#cv-download', '#cv-download-2'].forEach((selector) => {
       const button = $(selector);
-      if (button) button.hidden = !hasCv;
+      if (!button) return;
+      button.hidden = !hasCv;
+      if (hasCv && cvHref) {
+        button.href = cvHref;
+        if (IS_STATIC) button.setAttribute('download', media.cvName || 'cv');
+      }
     });
 
     const updated = $('#footer-updated');
@@ -487,7 +504,7 @@
     $('#footer-year').textContent = String(new Date().getFullYear());
 
     try {
-      const response = await fetch('/api/profile', { headers: { Accept: 'application/json' } });
+      const response = await fetch(PROFILE_URL, { headers: { Accept: 'application/json' } });
       if (!response.ok) throw new Error(`Profile request failed (${response.status})`);
       const profile = await response.json();
       render(profile);
