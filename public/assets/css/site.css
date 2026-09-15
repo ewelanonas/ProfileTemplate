@@ -47,6 +47,13 @@ html[data-theme="light"] {
   box-sizing: border-box;
 }
 
+/* The hidden attribute must beat component display rules.
+   Without this, any element given `display: grid/flex/block` stays on screen
+   after JS sets `hidden`, because an author rule outranks the browser default. */
+[hidden] {
+  display: none !important;
+}
+
 html {
   scroll-behavior: smooth;
   scroll-padding-top: 5.5rem;
