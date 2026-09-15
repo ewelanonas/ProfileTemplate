@@ -1,17 +1,19 @@
-# Deploying to DigitalOcean
+# Publishing the site
 
-Two options. Pick based on one question: **do your uploads need to survive a redeploy?**
+Four routes, in the order most people should consider them.
 
-| | Droplet + Docker | App Platform |
-| --- | --- | --- |
-| Uploads and profile text survive redeploys | Yes, stored in volumes | No, filesystem is wiped |
-| Setup effort | Medium (one server to maintain) | Low (connect the repo, done) |
-| Cost | From ~$6/month | From ~$5/month |
-| HTTPS | You run Caddy or Nginx (automatic with Caddy) | Included |
+| | Cloudflare Pages | Droplet + Docker | App Platform | ngrok |
+| --- | --- | --- | --- | --- |
+| Cost | free | from ~$6/month | from ~$5/month | free |
+| Always online | yes | yes | yes | only while your laptop runs |
+| Uploads survive publishing | yes | yes | no, filesystem is wiped | yes, files stay local |
+| Edit from any browser | no, edit locally then publish | yes | yes | yes |
+| HTTPS | included | Caddy handles it | included | included |
+| Effort | lowest | medium, you run a server | low | lowest |
 
-Recommendation: **Droplet + Docker**. This app keeps content on disk, and App Platform
-gives every deploy a fresh filesystem, which means re-uploading your photo and CV each
-time you push a change.
+Recommendation: **Cloudflare Pages** (Option D) while a permanent, free, always-fast link
+matters most. Move to a **Droplet** (Option A) when you want to edit content from any
+browser without publishing again.
 
 ---
 
@@ -228,6 +230,93 @@ public page, and `/admin` to sign in.
   way to pull the link if you ever need to.
 - A permanent, always-on link is still worth having. Cloudflare Pages (static publish) or
   a Droplet both avoid the interstitial and the laptop dependency.
+
+---
+
+## Option D — Cloudflare Pages (free, recommended)
+
+You keep editing locally in the admin area. When you are happy with the result you export
+the site to plain files and upload them. Cloudflare serves them from its CDN with HTTPS,
+for free, with no server to keep awake.
+
+Free plan: unlimited bandwidth, 500 builds per month, up to 20,000 files per site
+([limits](https://developers.cloudflare.com/pages/platform/limits/)).
+
+### 1. Fill in your content first
+
+```powershell
+npm start
+```
+
+Sign in at `/admin`, complete every tab, and upload your photo, background and CV. What you
+see on `http://localhost:PORT` is exactly what gets published.
+
+### 2. Export the site
+
+```powershell
+npm run export
+```
+
+This writes `dist/`:
+
+- `index.html` with your name, headline and description baked into the page title and the
+  social preview tags, so a link shared on LinkedIn shows something meaningful
+- `profile.json` with all your content
+- `uploads/` containing **only** the photo, background and CV your profile points at, so
+  old files you replaced are never published
+- `assets/`, `404.html`, `robots.txt`
+- `_headers` with the same security headers the Node app sends
+- no admin area, since it cannot work without the server
+
+Once you know your public URL, pass it so the canonical and social tags are exact:
+
+```powershell
+npm run export -- https://your-project.pages.dev
+```
+
+`dist/` is git-ignored. It holds your CV and photos, so it is published, never committed.
+
+### 3. Publish
+
+**First time, through the dashboard:**
+
+1. Sign in at [dash.cloudflare.com](https://dash.cloudflare.com/) (create a free account if
+   you need one).
+2. **Compute (Workers) → Workers & Pages → Create → Pages → Upload assets**.
+3. Name the project, for example `emmanuel-anonas`. That gives you
+   `https://emmanuel-anonas.pages.dev`.
+4. Drag the whole `dist` folder onto the upload area, then **Deploy site**.
+
+**Afterwards, from the terminal:**
+
+```powershell
+npx wrangler@4 pages deploy dist --project-name=YOUR-PROJECT-NAME
+```
+
+The first run opens a browser to authorise your Cloudflare account. Every later publish is
+that one command.
+
+### 4. Updating your site later
+
+```powershell
+npm start                 # edit in /admin, upload files, save
+npm run export -- https://your-project.pages.dev
+npx wrangler@4 pages deploy dist --project-name=YOUR-PROJECT-NAME
+```
+
+Three commands, about a minute.
+
+### 5. Custom domain, optional
+
+In the Pages project: **Custom domains → Set up a domain**. If the domain is already on
+Cloudflare the DNS record is created for you; otherwise you point a CNAME at the
+`pages.dev` hostname. The certificate is issued automatically.
+
+### What you give up
+
+Editing happens on your laptop, not from any browser, and your published site only changes
+when you export and upload again. If that becomes annoying, Option A runs the full app with
+a live admin area.
 
 ---
 

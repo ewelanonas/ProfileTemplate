@@ -11,6 +11,9 @@ data/
 uploads/
 sessions/
 
+# static export: contains your CV and photos, publish it, do not commit it
+dist/
+
 # logs
 *.log
 npm-debug.log*

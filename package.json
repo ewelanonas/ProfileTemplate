@@ -11,6 +11,7 @@
     "start": "node src/server.js",
     "dev": "node --watch src/server.js",
     "setup": "node scripts/setup.js",
+    "export": "node scripts/export.js",
     "hash-password": "node scripts/hash-password.js",
     "check": "node --check src/server.js && node scripts/check-syntax.js"
   },
