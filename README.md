@@ -21,6 +21,7 @@ and CV file without touching any code.
 - [Running it on your computer](#running-it-on-your-computer)
 - [Filling in your profile](#filling-in-your-profile)
 - [Uploading photo, background and CV](#uploading-photo-background-and-cv)
+- [Updating the site after it is published](#updating-the-site-after-it-is-published)
 - [Changing your username or password](#changing-your-username-or-password)
 - [Where your content is stored](#where-your-content-is-stored)
 - [Everyday commands](#everyday-commands)
@@ -166,6 +167,48 @@ rejected and deleted. iPhone `.HEIC` photos are not accepted — export them as 
 
 ---
 
+## Updating the site after it is published
+
+If you published the static export (Cloudflare, GitHub Pages), **there is no admin area on
+the host**. Those platforms serve files; they have no login and no editor. The admin lives
+on your computer, and publishing sends a fresh copy of the result.
+
+Every change follows the same loop:
+
+```powershell
+npm start
+```
+
+Edit at `http://localhost:PORT/admin`, press **Save changes**, then:
+
+```powershell
+npm run export -- https://YOUR-PUBLIC-URL
+npx wrangler deploy
+```
+
+About a minute in total. Afterwards you can stop the local server with `Ctrl + C` — the host
+has its own copy and keeps serving it whether your laptop is on or not.
+
+Pass your real URL to `npm run export` every time. It fills the canonical link and the
+social preview tags, and a stale value points search engines and LinkedIn at an address that
+does not exist.
+
+**Do not edit `dist/` by hand.** It is regenerated from scratch on every export, so changes
+made there are lost and your laptop and live site drift apart. `data/profile.json`, written
+by the admin area, is the single source of truth.
+
+### Want to edit from any browser instead?
+
+That needs the app itself running on a server, not a static copy. Two routes, both in
+[DEPLOY.md](DEPLOY.md): a DigitalOcean Droplet (~$6/month, least hassle) or Oracle Cloud
+Always Free (free, but you are the sysadmin). With either, you sign in at `/admin` from
+anywhere and changes are live immediately — no export, no deploy.
+
+The trade-off is the honest one: static publishing costs nothing and never sleeps, but
+editing runs through your laptop.
+
+---
+
 ## Changing your username or password
 
 The credentials live in `.env` at the project root, as `ADMIN_USERNAME` and
@@ -253,7 +296,7 @@ every deploy or restart.
 Full step-by-step instructions for the server-based options live in
 [DEPLOY.md](DEPLOY.md).
 
-### Cloudflare Pages or GitHub Pages — static publish
+### Cloudflare or GitHub Pages — static publish
 
 You keep editing on your laptop in the admin area, then publish the finished result as
 static files. Nothing to maintain, nothing to keep awake, no server bill.
