@@ -110,10 +110,15 @@ async function main() {
   await fsp.rm(OUT, { recursive: true, force: true });
   await fsp.mkdir(OUT, { recursive: true });
 
-  // 1. Public assets, minus the admin area which cannot work without the server.
+  // 1. Public assets, minus everything that only the admin area uses.
+  const adminOnly = new Set([
+    'admin',
+    path.join('assets', 'css', 'admin.css'),
+    path.join('assets', 'js', 'admin.js'),
+  ]);
   await copyDir(config.paths.public, OUT, (source) => {
     const relative = path.relative(config.paths.public, source);
-    return relative === 'admin' || relative.startsWith(`admin${path.sep}`);
+    return adminOnly.has(relative) || relative.startsWith(`admin${path.sep}`);
   });
 
   // 2. The profile itself.
