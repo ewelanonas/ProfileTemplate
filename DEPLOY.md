@@ -233,14 +233,26 @@ public page, and `/admin` to sign in.
 
 ---
 
-## Option D — Cloudflare Pages (free, recommended)
+## Option D — Cloudflare (free, recommended)
 
 You keep editing locally in the admin area. When you are happy with the result you export
 the site to plain files and upload them. Cloudflare serves them from its CDN with HTTPS,
 for free, with no server to keep awake.
 
-Free plan: unlimited bandwidth, 500 builds per month, up to 20,000 files per site
-([limits](https://developers.cloudflare.com/pages/platform/limits/)).
+Two Cloudflare products can host these files, and the dashboard's upload flow now creates
+the first one:
+
+| | Worker with static assets | Pages |
+| --- | --- | --- |
+| URL | `PROJECT.ACCOUNT.workers.dev` | `PROJECT.pages.dev` |
+| Created by | **Workers & Pages → Create → upload assets** (the current default) | Pages-specific flow |
+| Deploy command | `npx wrangler deploy` | `npx wrangler pages deploy dist` |
+| `_headers` support | yes | yes |
+| Cost | free | free |
+
+Either is fine. This repository ships a [`wrangler.jsonc`](wrangler.jsonc) for the Worker
+route, since that is what you get by dragging a folder into the dashboard today. Change the
+`name` field to your own project name if you reuse this repo.
 
 ### 1. Fill in your content first
 
@@ -276,41 +288,51 @@ npm run export -- https://your-project.pages.dev
 
 `dist/` is git-ignored. It holds your CV and photos, so it is published, never committed.
 
-### 3. Publish
+### 3. Publish, first time
 
-**First time, through the dashboard:**
+Through the dashboard, no CLI needed:
 
-1. Sign in at [dash.cloudflare.com](https://dash.cloudflare.com/) (create a free account if
-   you need one).
-2. **Compute (Workers) → Workers & Pages → Create → Pages → Upload assets**.
-3. Name the project, for example `emmanuel-anonas`. That gives you
-   `https://emmanuel-anonas.pages.dev`.
-4. Drag the whole `dist` folder onto the upload area, then **Deploy site**.
+1. Sign in at [dash.cloudflare.com](https://dash.cloudflare.com/). A free account needs an
+   email and password, no card.
+2. **Workers & Pages → Create application → Get started** under *Drag and drop your files*.
+3. Enter a project name, for example `emmanuel-anonas`. Use your own name rather than
+   `portfolio`: this becomes the link on your CV.
+4. Drag the whole `dist` **folder** in (not the files individually, so `assets/` and
+   `uploads/` keep their structure), then **Deploy site**.
 
-**Afterwards, from the terminal:**
+Drag and drop accepts up to 1,000 files and 25 MB per file
+([docs](https://developers.cloudflare.com/pages/get-started/direct-upload/)). This export is
+about ten files and 120 KB.
+
+### 4. Publish again from the terminal
+
+Once the project exists, `wrangler.jsonc` makes every later publish two commands:
 
 ```powershell
-npx wrangler@4 pages deploy dist --project-name=YOUR-PROJECT-NAME
+npx wrangler login
+npx wrangler deploy
 ```
 
-The first run opens a browser to authorise your Cloudflare account. Every later publish is
-that one command.
+`wrangler login` opens a browser once to authorise your account. After that, `npx wrangler
+deploy` uploads `dist/` to the project named in `wrangler.jsonc`.
 
-### 4. Updating your site later
+### 5. Updating your site later
 
 ```powershell
 npm start                 # edit in /admin, upload files, save
-npm run export -- https://your-project.pages.dev
-npx wrangler@4 pages deploy dist --project-name=YOUR-PROJECT-NAME
+npm run export -- https://YOUR-PROJECT.ACCOUNT.workers.dev
+npx wrangler deploy
 ```
 
-Three commands, about a minute.
+Pass the real URL every time. It is what fills the canonical link and the social preview
+tags, and a stale value tells search engines and LinkedIn to look at an address that does
+not exist.
 
-### 5. Custom domain, optional
+### 6. Custom domain, optional
 
-In the Pages project: **Custom domains → Set up a domain**. If the domain is already on
-Cloudflare the DNS record is created for you; otherwise you point a CNAME at the
-`pages.dev` hostname. The certificate is issued automatically.
+In the project settings: **Domains & Routes → Add → Custom domain**. If the domain already
+sits on Cloudflare the DNS record is created for you, otherwise you point a CNAME at the
+`workers.dev` hostname. The certificate is issued automatically.
 
 ### What you give up
 

@@ -268,11 +268,11 @@ Trade-off: you edit locally and publish, instead of editing from any browser. Fo
 portfolio that changes a few times a year, that is a small price for a link that is always
 instant.
 
-Three commands publish it:
+Two commands publish it:
 
 ```powershell
-npm run export -- https://your-project.pages.dev
-npx wrangler@4 pages deploy dist --project-name=YOUR-PROJECT-NAME
+npm run export -- https://YOUR-PROJECT.ACCOUNT.workers.dev
+npx wrangler deploy
 ```
 
 `npm run export` writes `dist/`: the page with your name and social preview tags baked in,
