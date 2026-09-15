@@ -2,7 +2,7 @@
 
 const bcrypt = require('bcryptjs');
 
-const { askSecret } = require('./prompt');
+const { askSecret, close } = require('./prompt');
 
 const MIN_LENGTH = 12;
 const ROUNDS = 12;
@@ -27,7 +27,9 @@ async function main() {
   console.log(`ADMIN_PASSWORD_HASH=${hash}\n`);
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  })
+  .finally(close);
