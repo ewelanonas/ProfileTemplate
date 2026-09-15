@@ -6,7 +6,7 @@ const crypto = require('node:crypto');
 
 const bcrypt = require('bcryptjs');
 
-const { ask, askSecret } = require('./prompt');
+const { ask, askSecret, close } = require('./prompt');
 
 const root = path.resolve(__dirname, '..');
 const envPath = path.join(root, '.env');
@@ -64,8 +64,19 @@ async function main() {
     process.exit(1);
   }
 
-  const port = (await ask('Port [3000]: ')) || '3000';
-  const siteUrl = (await ask(`Site URL [http://localhost:${port}]: `)) || `http://localhost:${port}`;
+  const portAnswer = (await ask('Port [3000]: ')) || '3000';
+  const port = /^\d{2,5}$/.test(portAnswer) ? portAnswer : '3000';
+  if (port !== portAnswer) {
+    console.log(`  (ignoring "${portAnswer}", not a port number — using ${port})`);
+  }
+
+  const fallbackUrl = `http://localhost:${port}`;
+  const urlAnswer = (await ask(`Site URL [${fallbackUrl}]: `)) || fallbackUrl;
+  const siteUrl = /^https?:\/\/[^\s]+$/i.test(urlAnswer) ? urlAnswer.replace(/\/$/, '') : fallbackUrl;
+  if (siteUrl !== urlAnswer.replace(/\/$/, '')) {
+    console.log(`  (ignoring "${urlAnswer}", not an http(s) URL — using ${siteUrl})`);
+  }
+
   const isProduction = siteUrl.startsWith('https://');
 
   const hash = await bcrypt.hash(password, 12);
@@ -80,10 +91,13 @@ async function main() {
   console.log(`  - admin username: ${username}`);
   console.log('  - bcrypt password hash (the password itself was not saved)');
   console.log('  - a fresh random SESSION_SECRET');
+  console.log(`  - port ${port} and site URL ${siteUrl}`);
   console.log('\nNext: npm start  then open the site and go to /admin\n');
 }
 
-main().catch((error) => {
-  console.error(error.message);
-  process.exit(1);
-});
+main()
+  .catch((error) => {
+    console.error(error.message);
+    process.exitCode = 1;
+  })
+  .finally(close);
