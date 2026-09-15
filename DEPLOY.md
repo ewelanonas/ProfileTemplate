@@ -174,6 +174,63 @@ go that way.
 
 ---
 
+## Option C — Sharing from your laptop with ngrok (temporary)
+
+Useful for showing the site live during a call, testing on your phone, or getting quick
+feedback. Not a good permanent link for a CV, for three reasons:
+
+1. On the free tier ngrok shows an [interstitial warning page in front of all HTML browser
+   traffic](https://ngrok.com/docs/pricing-limits/free-plan-limits). A visitor must click
+   **Visit** before reaching your site; a cookie then suppresses it for that domain for
+   7 days. The `ngrok-skip-browser-warning` header only helps programmatic clients, not a
+   recruiter opening the link in a browser.
+2. The site is only up while your laptop is on and the agent is running.
+3. Free quotas: 1 GB data transfer out and 20,000 HTTP requests per month, up to 3 online
+   endpoints, and one automatically assigned `*.ngrok-free.app` dev domain.
+
+### Before you expose anything
+
+The admin login becomes reachable from the internet the moment the tunnel opens. Set your
+own credentials first:
+
+```powershell
+npm run setup
+```
+
+### Run it
+
+Two terminals. First the app, told that it is being served over HTTPS under the ngrok
+hostname:
+
+```powershell
+$env:NODE_ENV = "production"
+$env:COOKIE_SECURE = "true"
+$env:SITE_URL = "https://YOUR-DEV-DOMAIN.ngrok-free.app"
+npm start
+```
+
+`SITE_URL` matters: state-changing admin requests are checked against it, and secure
+cookies need the app to know it is behind HTTPS. Then the tunnel, pointing at the same
+port the app is listening on:
+
+```powershell
+ngrok http 4173
+```
+
+ngrok prints the public URL. Open `https://YOUR-DEV-DOMAIN.ngrok-free.app` to check the
+public page, and `/admin` to sign in.
+
+### Notes
+
+- Uploads and profile edits stay on your laptop in `data/` and `uploads/`, so nothing is
+  lost when the tunnel closes.
+- `Ctrl + C` in the ngrok terminal takes the site offline immediately. That is the fastest
+  way to pull the link if you ever need to.
+- A permanent, always-on link is still worth having. Cloudflare Pages (static publish) or
+  a Droplet both avoid the interstitial and the laptop dependency.
+
+---
+
 ## After deploying, check these
 
 ```bash
