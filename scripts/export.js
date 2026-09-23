@@ -87,9 +87,14 @@ const HEADERS = `# Security headers for the static build, mirroring the Node app
 /uploads/*
   Cache-Control: public, max-age=3600
 
-# Always download the CV rather than rendering it in the tab.
+# Word files always download: browsers cannot render them anyway.
 /uploads/cv/*
   Content-Disposition: attachment
+
+# The PDF opens in the browser, so a recruiter can read it before saving.
+/uploads/cvPdf/*
+  Content-Type: application/pdf
+  Content-Disposition: inline
 `;
 
 const ROBOTS = `User-agent: *
@@ -126,7 +131,7 @@ async function main() {
 
   // 3. Only the media the profile actually points at, so old uploads stay private.
   const media = profile.media || {};
-  const referenced = [media.photo, media.background, media.cv].filter(
+  const referenced = [media.photo, media.background, media.cv, media.cvPdf].filter(
     (value) => typeof value === 'string' && value.startsWith('/uploads/'),
   );
 

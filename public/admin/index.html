@@ -129,12 +129,31 @@
                 <progress class="upload__progress" data-progress max="100" value="0" hidden></progress>
               </article>
 
-              <article class="upload" data-kind="cv">
-                <h3 class="upload__title">CV / résumé</h3>
-                <p class="upload__hint" data-hint>PDF or DOCX</p>
+              <article class="upload" data-kind="cvPdf">
+                <h3 class="upload__title">CV — PDF</h3>
+                <p class="upload__hint" data-hint>PDF only. This is the version most recruiters ask for</p>
                 <div class="upload__preview upload__preview--file">
                   <span class="upload__file" data-file hidden></span>
-                  <span class="upload__empty" data-empty>No CV yet</span>
+                  <span class="upload__empty" data-empty>No PDF yet</span>
+                </div>
+                <div class="upload__drop" data-drop tabindex="0" role="button" aria-label="Choose or drop your CV as a PDF">
+                  <strong>Click to choose</strong> or drag a file here
+                </div>
+                <input type="file" data-input accept="application/pdf,.pdf" hidden />
+                <div class="upload__actions">
+                  <button class="btn btn--ghost btn--sm" type="button" data-pick>Choose file</button>
+                  <a class="btn btn--ghost btn--sm" href="/cv/pdf" target="_blank" rel="noopener" data-open hidden>Open ↗</a>
+                  <button class="btn btn--danger btn--sm" type="button" data-remove hidden>Remove</button>
+                </div>
+                <progress class="upload__progress" data-progress max="100" value="0" hidden></progress>
+              </article>
+
+              <article class="upload" data-kind="cv">
+                <h3 class="upload__title">CV — Word</h3>
+                <p class="upload__hint" data-hint>PDF or DOCX. Optional second format</p>
+                <div class="upload__preview upload__preview--file">
+                  <span class="upload__file" data-file hidden></span>
+                  <span class="upload__empty" data-empty>No Word CV yet</span>
                 </div>
                 <div class="upload__drop" data-drop tabindex="0" role="button" aria-label="Choose or drop your CV file">
                   <strong>Click to choose</strong> or drag a file here
@@ -142,7 +161,7 @@
                 <input type="file" data-input accept="application/pdf,.pdf,.docx" hidden />
                 <div class="upload__actions">
                   <button class="btn btn--ghost btn--sm" type="button" data-pick>Choose file</button>
-                  <a class="btn btn--ghost btn--sm" href="/cv" target="_blank" rel="noopener" data-open hidden>Open ↗</a>
+                  <a class="btn btn--ghost btn--sm" href="/cv/docx" target="_blank" rel="noopener" data-open hidden>Open ↗</a>
                   <button class="btn btn--danger btn--sm" type="button" data-remove hidden>Remove</button>
                 </div>
                 <progress class="upload__progress" data-progress max="100" value="0" hidden></progress>

@@ -122,7 +122,7 @@ Everything is edited in the admin area, organised into tabs:
 
 | Tab | What lives there |
 | --- | --- |
-| 🖼 Photo, CV & background | File uploads. These save immediately |
+| 🖼 Photo, CV & background | File uploads: photo, background, CV as PDF and CV as Word. These save immediately |
 | 👤 Basics | Name, headline, tagline, location, email, phone, website, availability badge, about text, social links |
 | 🛠 Skills | Skill groups, one skill per line inside each group |
 | 💼 Experience | Roles, newest first. Achievements one per line |
@@ -156,7 +156,26 @@ progress bar runs while the file transfers and a preview appears when it finishe
 | --- | --- | --- | --- |
 | Profile photo | JPG, PNG, WebP | 5 MB | Square, around 800×800. It is cropped to centre, so keep your face centred |
 | Hero background | JPG, PNG, WebP | 5 MB | Wide, 1920×1080 or larger. Darker, simpler images read best because your name sits on top |
-| CV | PDF, DOCX | 10 MB | PDF is safer: formatting never shifts and some companies block Word files |
+| CV — PDF | PDF | 10 MB | The version most recruiters and applicant tracking systems ask for |
+| CV — Word | PDF, DOCX | 10 MB | Optional second format, for recruiters who want an editable file |
+
+### Two CV formats
+
+Upload both and the site handles the rest: the main **Download CV (PDF)** button serves the
+PDF, with a quieter *Also available as Word document* link underneath. Upload only one and
+that one becomes the primary button, with no secondary link.
+
+When the app is running, three URLs are available:
+
+| URL | Serves |
+| --- | --- |
+| `/cv` | PDF if there is one, otherwise the Word file |
+| `/cv/pdf` | the PDF |
+| `/cv/docx` | the Word file |
+
+In the published static build the buttons link straight at the files, and the download name
+comes from the file name you uploaded. PDFs open in the browser so a recruiter can read
+before saving; Word files always download.
 
 **Remove** deletes the current file and clears the slot. The background is optional; without
 one the hero falls back to a gradient and still looks finished.

@@ -402,6 +402,12 @@ img {
   background: var(--surface-strong);
 }
 
+.cv-alt {
+  margin-top: 0.75rem;
+  font-size: 0.88rem;
+  color: var(--text-faint);
+}
+
 .socials {
   display: flex;
   flex-wrap: wrap;

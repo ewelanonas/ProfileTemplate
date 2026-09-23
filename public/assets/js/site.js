@@ -203,16 +203,52 @@
       preload.src = background;
     }
 
-    const hasCv = Boolean(media.cv);
-    const cvHref = IS_STATIC ? safeHref(media.cv) : '/cv';
+    // PDF is the format recruiters and ATS tools expect, so it leads. Word, when
+    // present, is offered as a secondary link rather than a competing button.
+    const primary = media.cvPdf
+      ? { path: media.cvPdf, name: media.cvPdfName, format: 'PDF', route: '/cv/pdf' }
+      : media.cv
+        ? { path: media.cv, name: media.cvName, format: /\.pdf$/i.test(media.cv) ? 'PDF' : 'Word', route: '/cv/docx' }
+        : null;
+
+    const alternate =
+      media.cvPdf && media.cv
+        ? { path: media.cv, name: media.cvName, format: /\.pdf$/i.test(media.cv) ? 'PDF' : 'Word', route: '/cv/docx' }
+        : null;
+
+    const linkFor = (entry) => (IS_STATIC ? safeHref(entry.path) : entry.route);
+
     ['#cv-download', '#cv-download-2'].forEach((selector) => {
       const button = $(selector);
       if (!button) return;
-      button.hidden = !hasCv;
-      if (hasCv && cvHref) {
-        button.href = cvHref;
-        if (IS_STATIC) button.setAttribute('download', media.cvName || 'cv');
+      button.hidden = !primary;
+      if (!primary) return;
+
+      const href = linkFor(primary);
+      if (href) button.href = href;
+      if (IS_STATIC) button.setAttribute('download', primary.name || 'cv');
+
+      const label = $('[data-label]', button);
+      if (label) {
+        const base = selector === '#cv-download' ? 'Download CV' : 'Download my CV';
+        label.textContent = `${base} (${primary.format})`;
       }
+    });
+
+    [
+      ['#cv-alt-wrap', '#cv-alt'],
+      ['#cv-alt-wrap-2', '#cv-alt-2'],
+    ].forEach(([wrapSelector, linkSelector]) => {
+      const wrap = $(wrapSelector);
+      const link = $(linkSelector);
+      if (!wrap || !link) return;
+      wrap.hidden = !alternate;
+      if (!alternate) return;
+
+      const href = linkFor(alternate);
+      if (href) link.href = href;
+      if (IS_STATIC) link.setAttribute('download', alternate.name || 'cv');
+      link.textContent = alternate.format === 'Word' ? 'Word document' : 'PDF';
     });
 
     const updated = $('#footer-updated');

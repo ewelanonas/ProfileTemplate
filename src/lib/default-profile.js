@@ -60,6 +60,15 @@ module.exports = {
   languages: [{ name: 'English', level: 'Professional' }],
   interests: [],
   theme: { accent: '#6c8cff', mode: 'dark' },
-  media: { photo: '', background: '', cv: '', cvName: '', cvUpdatedAt: '' },
+  media: {
+    photo: '',
+    background: '',
+    cv: '',
+    cvName: '',
+    cvUpdatedAt: '',
+    cvPdf: '',
+    cvPdfName: '',
+    cvPdfUpdatedAt: '',
+  },
   updatedAt: new Date(0).toISOString(),
 };

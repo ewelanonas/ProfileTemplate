@@ -532,7 +532,8 @@
   const UPLOAD_LABELS = {
     photo: 'Profile photo',
     background: 'Background image',
-    cv: 'CV',
+    cv: 'Word CV',
+    cvPdf: 'PDF CV',
   };
 
   function paintMedia() {
@@ -563,7 +564,7 @@
       }
 
       if (fileLabel) {
-        fileLabel.textContent = media.cvName || (hasValue ? 'Uploaded CV' : '');
+        fileLabel.textContent = media[`${kind}Name`] || (hasValue ? 'Uploaded file' : '');
         fileLabel.hidden = !hasValue;
       }
       if (open) open.hidden = !hasValue;

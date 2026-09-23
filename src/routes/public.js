@@ -18,11 +18,16 @@ router.get('/api/health', (_req, res) => {
   res.json({ status: 'ok', uptime: Math.round(process.uptime()) });
 });
 
-/** Friendly download URL that always points at the current CV file. */
-router.get('/cv', async (req, res) => {
+/**
+ * Sends one of the stored CV files as a download.
+ * @param {string[]} slots media keys to try, in order of preference
+ */
+async function sendCv(res, slots) {
   const profile = store.get();
-  const stored = profile.media && profile.media.cv;
-  if (!stored || !stored.startsWith('/uploads/')) {
+  const media = profile.media || {};
+
+  const stored = slots.map((slot) => media[slot]).find((value) => value && value.startsWith('/uploads/'));
+  if (!stored) {
     return res.status(404).type('text/plain').send('No CV has been uploaded yet.');
   }
 
@@ -38,8 +43,12 @@ router.get('/cv', async (req, res) => {
   }
 
   const slug = (profile.name || 'cv').replace(/[^a-z0-9]+/gi, '-').replace(/^-|-$/g, '') || 'cv';
-  const downloadName = `${slug}-CV${path.extname(target)}`;
-  return res.download(target, downloadName);
-});
+  return res.download(target, `${slug}-CV${path.extname(target)}`);
+}
+
+// PDF first: it is what most recruiters and applicant tracking systems expect.
+router.get('/cv', (_req, res) => sendCv(res, ['cvPdf', 'cv']));
+router.get('/cv/pdf', (_req, res) => sendCv(res, ['cvPdf']));
+router.get('/cv/docx', (_req, res) => sendCv(res, ['cv']));
 
 module.exports = router;
