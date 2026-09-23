@@ -1,0 +1,81 @@
+/* Cover letter generator: shared by the admin tab and the standalone tool page. */
+
+.letter {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(340px, 1fr));
+  gap: 1.25rem;
+  align-items: start;
+}
+
+.letter__pane {
+  display: grid;
+  gap: 0.75rem;
+  align-content: start;
+  padding: 1.25rem;
+  border-radius: var(--radius);
+  border: 1px solid var(--border);
+  background: var(--surface);
+}
+
+.letter__title {
+  font-size: 0.95rem;
+  font-weight: 650;
+}
+
+.letter__title:not(:first-child) {
+  margin-top: 0.5rem;
+}
+
+.letter__hint {
+  font-size: 0.82rem;
+  color: var(--text-faint);
+  margin-top: -0.5rem;
+}
+
+.letter__jd,
+.letter__body {
+  min-height: 12rem;
+  font-family: var(--mono);
+  font-size: 0.86rem;
+  line-height: 1.5;
+}
+
+.letter__body {
+  min-height: 18rem;
+}
+
+.letter__row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  align-items: center;
+}
+
+.letter__matches {
+  font-size: 0.8rem;
+  color: var(--text-muted);
+  padding: 0.6rem 0.8rem;
+  border-radius: var(--radius-sm);
+  background: var(--accent-soft);
+  border: 1px solid color-mix(in srgb, var(--accent) 30%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.letter__details {
+  margin-bottom: 0.25rem;
+}
+
+.letter__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+  margin-top: 0.25rem;
+}
+
+/* Standalone tool page */
+
+.tool__body {
+  max-width: 1240px;
+  margin-inline: auto;
+  padding: clamp(1.25rem, 3vw, 2rem) clamp(1rem, 3vw, 2rem) 4rem;
+}

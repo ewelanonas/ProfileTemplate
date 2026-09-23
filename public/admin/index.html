@@ -82,6 +82,7 @@
           <button class="tab" type="button" data-tab="education">🎓 Education &amp; certificates</button>
           <button class="tab" type="button" data-tab="extras">🌍 Languages &amp; interests</button>
           <button class="tab" type="button" data-tab="appearance">🎨 Appearance</button>
+          <button class="tab" type="button" data-tab="letter">✉ Cover letter</button>
         </nav>
 
         <main class="admin__panels">
@@ -234,6 +235,18 @@
             </header>
             <div class="grid grid--2" id="appearance-fields"></div>
           </section>
+
+          <!-- Cover letter generator -->
+          <section class="panel" data-panel="letter" aria-label="Cover letter generator" hidden>
+            <header class="panel__head">
+              <h2>Cover letter</h2>
+              <p>
+                Paste a job advert and get a first draft built from your profile. Nothing is saved or
+                sent anywhere: the document is assembled in your browser.
+              </p>
+            </header>
+            <div id="letter-mount"></div>
+          </section>
         </main>
       </div>
 
@@ -245,6 +258,8 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+    <script src="/assets/js/letter-core.js" defer></script>
+    <script src="/assets/js/letter-ui.js" defer></script>
     <script src="/assets/js/admin.js" defer></script>
   </body>
 </html>

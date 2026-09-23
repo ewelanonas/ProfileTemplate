@@ -99,6 +99,7 @@ const HEADERS = `# Security headers for the static build, mirroring the Node app
 
 const ROBOTS = `User-agent: *
 Allow: /
+Disallow: /tools/
 `;
 
 async function main() {
@@ -115,12 +116,9 @@ async function main() {
   await fsp.rm(OUT, { recursive: true, force: true });
   await fsp.mkdir(OUT, { recursive: true });
 
-  // 1. Public assets, minus everything that only the admin area uses.
-  const adminOnly = new Set([
-    'admin',
-    path.join('assets', 'css', 'admin.css'),
-    path.join('assets', 'js', 'admin.js'),
-  ]);
+  // 1. Public assets, minus the admin area itself. admin.css stays because the
+  // unlisted tool page reuses its form and layout styles.
+  const adminOnly = new Set(['admin', path.join('assets', 'js', 'admin.js')]);
   await copyDir(config.paths.public, OUT, (source) => {
     const relative = path.relative(config.paths.public, source);
     return adminOnly.has(relative) || relative.startsWith(`admin${path.sep}`);
@@ -156,7 +154,16 @@ async function main() {
   const html = await fsp.readFile(indexPath, 'utf8');
   await fsp.writeFile(indexPath, injectMeta(html, profile, siteUrl), 'utf8');
 
-  // 5. Host configuration.
+  // 5. Passphrase hash for the unlisted cover letter tool, when configured.
+  const gateSource = path.join(config.paths.data, 'letter-gate.json');
+  let toolReady = false;
+  if (fs.existsSync(gateSource)) {
+    await fsp.mkdir(path.join(OUT, 'tools'), { recursive: true });
+    await fsp.copyFile(gateSource, path.join(OUT, 'tools', 'letter-gate.json'));
+    toolReady = true;
+  }
+
+  // 6. Host configuration.
   await fsp.writeFile(path.join(OUT, '_headers'), HEADERS, 'utf8');
   await fsp.writeFile(path.join(OUT, 'robots.txt'), ROBOTS, 'utf8');
 
@@ -176,6 +183,11 @@ async function main() {
   console.log(`  profile: ${profile.name}`);
   console.log(`  media:   ${copied.length ? copied.join(', ') : 'none'}`);
   if (missing.length) console.log(`  MISSING: ${missing.join(', ')} (re-upload in the admin area)`);
+  console.log(
+    toolReady
+      ? '  tool:    /tools/letter is published and passphrase protected'
+      : '  tool:    /tools/letter has no passphrase yet, run `npm run letter:lock` to enable it',
+  );
   if (siteUrl) console.log(`  meta:    canonical and social tags use ${siteUrl}`);
   else console.log('  meta:    pass your URL to add canonical/social tags, e.g. npm run export -- https://you.workers.dev');
 

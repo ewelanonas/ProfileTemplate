@@ -1,6 +1,7 @@
 'use strict';
 
 const path = require('node:path');
+const fs = require('node:fs');
 
 const express = require('express');
 const helmet = require('helmet');
@@ -91,6 +92,15 @@ function createApp() {
 
   const adminPage = path.join(config.paths.public, 'admin', 'index.html');
   app.get(['/admin', '/admin/login', '/admin/dashboard'], (_req, res) => res.sendFile(adminPage));
+
+  // Extensionless URL for the unlisted tool, matching how it is published.
+  app.get('/tools/letter', (_req, res) =>
+    res.sendFile(path.join(config.paths.public, 'tools', 'letter.html')),
+  );
+  app.get('/tools/letter-gate.json', (_req, res) => {
+    const gate = path.join(config.paths.data, 'letter-gate.json');
+    return fs.existsSync(gate) ? res.sendFile(gate) : res.status(404).json({ error: 'Not configured' });
+  });
 
   app.use((req, res) => {
     if (req.path.startsWith('/api/')) return res.status(404).json({ error: 'Not found' });
