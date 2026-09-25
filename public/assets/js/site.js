@@ -70,6 +70,20 @@
     if (section) section.hidden = !visible;
   }
 
+  /**
+   * Monogram initials: first and last name only. Middle initials ("Emmanuel L.
+   * Anonas") would otherwise win over the surname and read as "EL".
+   */
+  function initialsFrom(name) {
+    const parts = String(name || '')
+      .split(/\s+/)
+      .map((part) => part.replace(/[^\p{L}\p{N}]/gu, ''))
+      .filter(Boolean);
+    if (!parts.length) return '';
+    const picked = parts.length > 1 ? [parts[0], parts[parts.length - 1]] : [parts[0]];
+    return picked.map((part) => part[0].toUpperCase()).join('');
+  }
+
   function toast(message) {
     const node = $('#toast');
     if (!node) return;
@@ -123,14 +137,16 @@
       if (typeof value === 'string') node.textContent = value;
     });
 
-    const initials = name
-      .split(/\s+/)
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((part) => part[0].toUpperCase())
-      .join('');
+    const initials = initialsFrom(name);
     const initialsNode = $('#portrait-initials');
     if (initialsNode) initialsNode.textContent = initials || '·';
+
+    // The topbar mark is the monogram; the link itself carries the name for
+    // assistive tech, so the visible text can stay collapsed on first paint.
+    const monogram = $('#brand-monogram');
+    if (monogram) monogram.textContent = initials || '·';
+    const brand = $('#brand');
+    if (brand) brand.setAttribute('aria-label', `${name} — back to top`);
 
     if (profile.availability) {
       const status = $('#availability');
@@ -484,8 +500,17 @@
 
     const topbar = $('#topbar');
     const progress = $('#scroll-progress');
+    const heroName = $('.hero__name');
     const onScroll = () => {
       topbar.classList.toggle('is-stuck', window.scrollY > 8);
+
+      // Reveal the topbar wordmark only once the hero name is behind the header,
+      // so the name is never shown twice at the same time.
+      const hidden = heroName
+        ? heroName.getBoundingClientRect().bottom <= topbar.offsetHeight
+        : window.scrollY > 8;
+      topbar.classList.toggle('is-past-hero', hidden);
+
       const height = document.documentElement.scrollHeight - window.innerHeight;
       const ratio = height > 0 ? Math.min(1, window.scrollY / height) : 0;
       progress.style.width = `${(ratio * 100).toFixed(2)}%`;

@@ -164,7 +164,8 @@ img {
 .brand {
   display: inline-flex;
   align-items: center;
-  gap: 0.6rem;
+  /* No gap: the wordmark owns its own leading space so it can collapse away. */
+  gap: 0;
   color: var(--text);
   font-weight: 650;
   letter-spacing: -0.01em;
@@ -183,11 +184,46 @@ img {
   flex: none;
 }
 
+/* Monogram: initials carry meaning, unlike a decorative gradient tile. */
+.brand__mark--monogram {
+  width: 2rem;
+  height: 2rem;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--accent) 34%, var(--border));
+  background: color-mix(in srgb, var(--accent) 13%, var(--surface));
+  box-shadow: none;
+  color: color-mix(in srgb, var(--accent) 72%, var(--text));
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  transition: background var(--transition), border-color var(--transition);
+}
+
+.brand:hover .brand__mark--monogram {
+  background: color-mix(in srgb, var(--accent) 22%, var(--surface));
+  border-color: color-mix(in srgb, var(--accent) 52%, var(--border));
+}
+
+/*
+ * The hero already shows the name at full size, so the topbar wordmark stays
+ * collapsed until the hero name scrolls behind the header.
+ */
 .brand__name {
-  max-width: 12rem;
+  max-width: 0;
+  margin-inline-start: 0;
+  opacity: 0;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
+  transition: max-width 280ms ease, margin-inline-start 280ms ease, opacity 200ms ease;
+}
+
+.topbar.is-past-hero .brand__name {
+  max-width: min(12rem, 38vw);
+  margin-inline-start: 0.6rem;
+  opacity: 1;
 }
 
 .nav {
