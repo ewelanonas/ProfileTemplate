@@ -532,7 +532,8 @@
   const UPLOAD_LABELS = {
     photo: 'Profile photo',
     background: 'Background image',
-    cv: 'CV',
+    cv: 'Word CV',
+    cvPdf: 'PDF CV',
   };
 
   function paintMedia() {
@@ -563,7 +564,7 @@
       }
 
       if (fileLabel) {
-        fileLabel.textContent = media.cvName || (hasValue ? 'Uploaded CV' : '');
+        fileLabel.textContent = media[`${kind}Name`] || (hasValue ? 'Uploaded file' : '');
         fileLabel.hidden = !hasValue;
       }
       if (open) open.hidden = !hasValue;
@@ -763,8 +764,25 @@
           panel.classList.toggle('is-active', active);
           panel.hidden = !active;
         });
+        if (tab.dataset.tab === 'letter') mountLetterTool();
       });
     });
+  }
+
+  let letterMounted = false;
+
+  /** The generator is built on first visit to its tab, using the profile already loaded. */
+  function mountLetterTool() {
+    if (letterMounted) return;
+    const mountPoint = $('#letter-mount');
+    if (!mountPoint || !window.CoverLetterUI) return;
+
+    window.CoverLetterUI.mount({
+      container: mountPoint,
+      getProfile: () => state.profile,
+      notify: (message, kind) => toast(message, kind),
+    });
+    letterMounted = true;
   }
 
   function initLogin() {

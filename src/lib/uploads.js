@@ -38,6 +38,15 @@ const KINDS = {
     extensions: ['.pdf', '.docx'],
     label: 'CV document',
   },
+  // Second format for the same CV. Recruiters and ATS tools often insist on one
+  // or the other, so both can be published side by side.
+  cvPdf: {
+    dir: 'cvPdf',
+    maxBytes: config.limits.docBytes,
+    mimes: ['application/pdf'],
+    extensions: ['.pdf'],
+    label: 'CV in PDF',
+  },
 };
 
 const SIGNATURES = {

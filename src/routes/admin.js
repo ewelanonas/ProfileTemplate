@@ -109,9 +109,10 @@ router.post('/media/:kind', requireAuth, csrfGuard, writeLimiter, async (req, re
   const publicPath = publicPathFor(kind, file.filename);
 
   const patch = { [kind]: publicPath };
-  if (kind === 'cv') {
-    patch.cvName = String(file.originalname || '').slice(0, 120);
-    patch.cvUpdatedAt = new Date().toISOString();
+  // Document slots also remember the original file name and when it changed.
+  if (kind.startsWith('cv')) {
+    patch[`${kind}Name`] = String(file.originalname || '').slice(0, 120);
+    patch[`${kind}UpdatedAt`] = new Date().toISOString();
   }
 
   const profile = await store.setMedia(patch);
@@ -126,9 +127,9 @@ router.delete('/media/:kind', requireAuth, csrfGuard, writeLimiter, async (req, 
 
   const previous = store.get().media[kind];
   const patch = { [kind]: '' };
-  if (kind === 'cv') {
-    patch.cvName = '';
-    patch.cvUpdatedAt = '';
+  if (kind.startsWith('cv')) {
+    patch[`${kind}Name`] = '';
+    patch[`${kind}UpdatedAt`] = '';
   }
 
   const profile = await store.setMedia(patch);

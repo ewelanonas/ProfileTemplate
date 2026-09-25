@@ -82,6 +82,7 @@
           <button class="tab" type="button" data-tab="education">🎓 Education &amp; certificates</button>
           <button class="tab" type="button" data-tab="extras">🌍 Languages &amp; interests</button>
           <button class="tab" type="button" data-tab="appearance">🎨 Appearance</button>
+          <button class="tab" type="button" data-tab="letter">✉ Cover letter</button>
         </nav>
 
         <main class="admin__panels">
@@ -129,12 +130,31 @@
                 <progress class="upload__progress" data-progress max="100" value="0" hidden></progress>
               </article>
 
-              <article class="upload" data-kind="cv">
-                <h3 class="upload__title">CV / résumé</h3>
-                <p class="upload__hint" data-hint>PDF or DOCX</p>
+              <article class="upload" data-kind="cvPdf">
+                <h3 class="upload__title">CV — PDF</h3>
+                <p class="upload__hint" data-hint>PDF only. This is the version most recruiters ask for</p>
                 <div class="upload__preview upload__preview--file">
                   <span class="upload__file" data-file hidden></span>
-                  <span class="upload__empty" data-empty>No CV yet</span>
+                  <span class="upload__empty" data-empty>No PDF yet</span>
+                </div>
+                <div class="upload__drop" data-drop tabindex="0" role="button" aria-label="Choose or drop your CV as a PDF">
+                  <strong>Click to choose</strong> or drag a file here
+                </div>
+                <input type="file" data-input accept="application/pdf,.pdf" hidden />
+                <div class="upload__actions">
+                  <button class="btn btn--ghost btn--sm" type="button" data-pick>Choose file</button>
+                  <a class="btn btn--ghost btn--sm" href="/cv/pdf" target="_blank" rel="noopener" data-open hidden>Open ↗</a>
+                  <button class="btn btn--danger btn--sm" type="button" data-remove hidden>Remove</button>
+                </div>
+                <progress class="upload__progress" data-progress max="100" value="0" hidden></progress>
+              </article>
+
+              <article class="upload" data-kind="cv">
+                <h3 class="upload__title">CV — Word</h3>
+                <p class="upload__hint" data-hint>PDF or DOCX. Optional second format</p>
+                <div class="upload__preview upload__preview--file">
+                  <span class="upload__file" data-file hidden></span>
+                  <span class="upload__empty" data-empty>No Word CV yet</span>
                 </div>
                 <div class="upload__drop" data-drop tabindex="0" role="button" aria-label="Choose or drop your CV file">
                   <strong>Click to choose</strong> or drag a file here
@@ -142,7 +162,7 @@
                 <input type="file" data-input accept="application/pdf,.pdf,.docx" hidden />
                 <div class="upload__actions">
                   <button class="btn btn--ghost btn--sm" type="button" data-pick>Choose file</button>
-                  <a class="btn btn--ghost btn--sm" href="/cv" target="_blank" rel="noopener" data-open hidden>Open ↗</a>
+                  <a class="btn btn--ghost btn--sm" href="/cv/docx" target="_blank" rel="noopener" data-open hidden>Open ↗</a>
                   <button class="btn btn--danger btn--sm" type="button" data-remove hidden>Remove</button>
                 </div>
                 <progress class="upload__progress" data-progress max="100" value="0" hidden></progress>
@@ -215,6 +235,18 @@
             </header>
             <div class="grid grid--2" id="appearance-fields"></div>
           </section>
+
+          <!-- Cover letter generator -->
+          <section class="panel" data-panel="letter" aria-label="Cover letter generator" hidden>
+            <header class="panel__head">
+              <h2>Cover letter</h2>
+              <p>
+                Paste a job advert and get a first draft built from your profile. Nothing is saved or
+                sent anywhere: the document is assembled in your browser.
+              </p>
+            </header>
+            <div id="letter-mount"></div>
+          </section>
         </main>
       </div>
 
@@ -226,6 +258,8 @@
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
 
+    <script src="/assets/js/letter-core.js" defer></script>
+    <script src="/assets/js/letter-ui.js" defer></script>
     <script src="/assets/js/admin.js" defer></script>
   </body>
 </html>

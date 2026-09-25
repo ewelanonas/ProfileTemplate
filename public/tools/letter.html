@@ -1,0 +1,71 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow, noarchive" />
+    <title>Tools</title>
+    <link rel="icon" href="/assets/img/favicon.svg" type="image/svg+xml" />
+    <link rel="stylesheet" href="/assets/css/site.css" />
+    <link rel="stylesheet" href="/assets/css/admin.css" />
+    <link rel="stylesheet" href="/assets/css/letter.css" />
+  </head>
+  <body class="admin-body">
+    <!-- Gate -->
+    <section class="login" id="gate-view">
+      <form class="login__card" id="gate-form" novalidate>
+        <span class="brand__mark" aria-hidden="true"></span>
+        <h1 class="login__title">Private tool</h1>
+        <p class="login__hint">Enter the passphrase to continue.</p>
+
+        <label class="field">
+          <span class="field__label">Passphrase</span>
+          <span class="field__with-button">
+            <input
+              class="field__input"
+              id="gate-password"
+              type="password"
+              autocomplete="current-password"
+              required
+              autocapitalize="none"
+              spellcheck="false"
+            />
+            <button class="field__reveal" id="gate-reveal" type="button" aria-label="Show passphrase">👁</button>
+          </span>
+        </label>
+
+        <p class="login__error" id="gate-error" role="alert" hidden></p>
+
+        <button class="btn btn--primary login__submit" id="gate-submit" type="submit">Unlock</button>
+        <a class="login__back" href="/">← Back to the site</a>
+      </form>
+    </section>
+
+    <!-- Tool -->
+    <div class="admin" id="tool-view" hidden>
+      <header class="admin__bar">
+        <div class="admin__brand">
+          <span class="brand__mark" aria-hidden="true"></span>
+          <div>
+            <p class="admin__title">Cover letter generator</p>
+            <p class="admin__user">Runs entirely in this browser. Nothing is uploaded or stored.</p>
+          </div>
+        </div>
+        <div class="admin__bar-actions">
+          <a class="btn btn--ghost btn--sm" href="/" target="_blank" rel="noopener">View site ↗</a>
+          <button class="btn btn--ghost btn--sm" id="lock-button" type="button">Lock</button>
+        </div>
+      </header>
+
+      <main class="tool__body">
+        <div id="letter-mount"></div>
+      </main>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
+
+    <script src="/assets/js/letter-core.js" defer></script>
+    <script src="/assets/js/letter-ui.js" defer></script>
+    <script src="/assets/js/letter-page.js" defer></script>
+  </body>
+</html>

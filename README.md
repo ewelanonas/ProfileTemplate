@@ -22,6 +22,7 @@ and CV file without touching any code.
 - [Filling in your profile](#filling-in-your-profile)
 - [Uploading photo, background and CV](#uploading-photo-background-and-cv)
 - [Updating the site after it is published](#updating-the-site-after-it-is-published)
+- [Cover letter generator](#cover-letter-generator)
 - [Changing your username or password](#changing-your-username-or-password)
 - [Where your content is stored](#where-your-content-is-stored)
 - [Everyday commands](#everyday-commands)
@@ -122,7 +123,7 @@ Everything is edited in the admin area, organised into tabs:
 
 | Tab | What lives there |
 | --- | --- |
-| 🖼 Photo, CV & background | File uploads. These save immediately |
+| 🖼 Photo, CV & background | File uploads: photo, background, CV as PDF and CV as Word. These save immediately |
 | 👤 Basics | Name, headline, tagline, location, email, phone, website, availability badge, about text, social links |
 | 🛠 Skills | Skill groups, one skill per line inside each group |
 | 💼 Experience | Roles, newest first. Achievements one per line |
@@ -156,7 +157,26 @@ progress bar runs while the file transfers and a preview appears when it finishe
 | --- | --- | --- | --- |
 | Profile photo | JPG, PNG, WebP | 5 MB | Square, around 800×800. It is cropped to centre, so keep your face centred |
 | Hero background | JPG, PNG, WebP | 5 MB | Wide, 1920×1080 or larger. Darker, simpler images read best because your name sits on top |
-| CV | PDF, DOCX | 10 MB | PDF is safer: formatting never shifts and some companies block Word files |
+| CV — PDF | PDF | 10 MB | The version most recruiters and applicant tracking systems ask for |
+| CV — Word | PDF, DOCX | 10 MB | Optional second format, for recruiters who want an editable file |
+
+### Two CV formats
+
+Upload both and the site handles the rest: the main **Download CV (PDF)** button serves the
+PDF, with a quieter *Also available as Word document* link underneath. Upload only one and
+that one becomes the primary button, with no secondary link.
+
+When the app is running, three URLs are available:
+
+| URL | Serves |
+| --- | --- |
+| `/cv` | PDF if there is one, otherwise the Word file |
+| `/cv/pdf` | the PDF |
+| `/cv/docx` | the Word file |
+
+In the published static build the buttons link straight at the files, and the download name
+comes from the file name you uploaded. PDFs open in the browser so a recruiter can read
+before saving; Word files always download.
 
 **Remove** deletes the current file and clears the slot. The background is optional; without
 one the hero falls back to a gradient and still looks finished.
@@ -206,6 +226,67 @@ anywhere and changes are live immediately — no export, no deploy.
 
 The trade-off is the honest one: static publishing costs nothing and never sleeps, but
 editing runs through your laptop.
+
+---
+
+## Cover letter generator
+
+Paste a job advert, get a first draft built from your own profile, edit it, and download a
+Word document. Everything happens in the browser: no job adverts, drafts or letters are
+uploaded or stored anywhere.
+
+It lives in two places, and they are **not equally protected**:
+
+| Where | Protection | Use it when |
+| --- | --- | --- |
+| Admin area, **✉ Cover letter** tab | Real authentication: your username and bcrypt password, checked by the server | You are at your own machine. Prefer this |
+| Published site, `/tools/letter` | Unlisted page plus a passphrase checked in the browser | You are away from your machine |
+
+### What it does
+
+1. **Reads the advert.** Pulls out the company, role title, location and job ID. Each one is
+   an editable field, because no parser gets every advert right.
+2. **Matches it against you.** Scans for the themes the advert cares about — automation
+   frameworks, AI-assisted engineering, Playwright and TypeScript, API testing, CI/CD,
+   databases, performance, mentoring, Agile, RPA — and builds the body from the ones it
+   found, highest scoring first. It also picks a domain bridge: payments, banking,
+   transport, telecoms or insurance.
+3. **Drafts the letter.** Header from your profile, then opening, matched paragraphs, domain
+   bridge and closing. It only claims things your profile supports.
+4. **Hands it over.** *Download .docx*, *Save as PDF* (through the browser print dialog) or
+   *Copy as text* for application forms.
+
+Every field and paragraph is editable before you download, and you should read the draft
+before it goes anywhere. It is a first draft, not a finished letter.
+
+### Setting the passphrase for the published tool
+
+```powershell
+npm run letter:lock
+```
+
+It asks for a passphrase and writes `data/letter-gate.json` holding a random salt and a
+PBKDF2-SHA256 hash across 310,000 iterations. The passphrase itself is never stored. Publish
+again and the tool is live at `https://YOUR-URL/tools/letter`.
+
+### Be clear about what that passphrase protects
+
+On a static host there is no server to check anything, so the passphrase is verified in your
+browser against that hash. That means:
+
+- the page is unlisted, carries `noindex, nofollow, noarchive`, and `robots.txt` disallows
+  `/tools/`, so it stays out of search results
+- the passphrase is not in the page source, only a hash of it
+- **but** anyone who finds the URL can read the page source and attack the hash offline, so
+  this is a closed door, not a vault
+
+If you want real access control on the published tool, put it behind
+[Cloudflare Access](https://developers.cloudflare.com/cloudflare-one/policies/access/), which
+is free for small teams and authenticates before the page is served. Otherwise use the admin
+area, which already authenticates properly.
+
+One more thing worth knowing: your profile content is public either way, because the
+portfolio itself publishes it. The passphrase protects the tool, not the data it uses.
 
 ---
 
@@ -273,6 +354,7 @@ Compress-Archive -Path .\data, .\uploads, .\.env -DestinationPath ..\portfolio-b
 | `npm run setup` | Creates or replaces `.env` with your admin credentials |
 | `npm run hash-password` | Prints a bcrypt hash for a new password |
 | `npm run export` | Builds `dist/`, a static copy of your site ready to publish |
+| `npm run letter:lock` | Sets the passphrase for the published cover letter tool |
 | `npm run check` | Parses every JS file to catch syntax errors |
 
 ---

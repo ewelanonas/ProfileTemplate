@@ -173,6 +173,9 @@ function normaliseProfile(input, current = {}) {
       cv: typeof currentMedia.cv === 'string' ? currentMedia.cv : '',
       cvName: typeof currentMedia.cvName === 'string' ? currentMedia.cvName : '',
       cvUpdatedAt: typeof currentMedia.cvUpdatedAt === 'string' ? currentMedia.cvUpdatedAt : '',
+      cvPdf: typeof currentMedia.cvPdf === 'string' ? currentMedia.cvPdf : '',
+      cvPdfName: typeof currentMedia.cvPdfName === 'string' ? currentMedia.cvPdfName : '',
+      cvPdfUpdatedAt: typeof currentMedia.cvPdfUpdatedAt === 'string' ? currentMedia.cvPdfUpdatedAt : '',
     },
     updatedAt: new Date().toISOString(),
   };
