@@ -16,6 +16,9 @@
   const PROFILE_URL = staticSource || '/api/profile';
   const IS_STATIC = Boolean(staticSource);
 
+  /* How many responsibility bullets show before the rest go behind a disclosure. */
+  const BULLETS_SHOWN = 3;
+
   /* ---------- helpers ---------- */
 
   /** Builds an element and sets text through textContent, so profile data is never parsed as HTML. */
@@ -57,6 +60,16 @@
         ...(isExternal ? { target: '_blank', rel: 'noopener noreferrer' } : {}),
       },
     });
+  }
+
+  /** Host + path without the noise, so a link can show where it goes. */
+  function prettyUrl(url) {
+    try {
+      const parsed = new URL(url, window.location.origin);
+      return `${parsed.host}${parsed.pathname}`.replace(/^www\./, '').replace(/\/$/, '');
+    } catch {
+      return String(url || '');
+    }
   }
 
   function dateRange(start, end, current) {
@@ -129,6 +142,12 @@
 
   /* ---------- rendering ---------- */
 
+  /** Label + value cell for the masthead spec strip. */
+  function specCell(label, value) {
+    if (!value) return null;
+    return el('div', {}, [el('dt', { text: label }), el('dd', {}, [value])]);
+  }
+
   function renderBasics(profile) {
     const name = profile.name || 'Portfolio';
     document.title = profile.headline ? `${name} — ${profile.headline}` : name;
@@ -141,8 +160,8 @@
     const initialsNode = $('#portrait-initials');
     if (initialsNode) initialsNode.textContent = initials || '·';
 
-    // The topbar mark is the monogram; the link itself carries the name for
-    // assistive tech, so the visible text can stay collapsed on first paint.
+    // The bar mark is the monogram; the link itself carries the name for
+    // assistive tech, so the visible wordmark can stay collapsed on first paint.
     const monogram = $('#brand-monogram');
     if (monogram) monogram.textContent = initials || '·';
     const brand = $('#brand');
@@ -159,41 +178,60 @@
       document.documentElement.style.setProperty('--accent', profile.theme.accent);
     }
 
-    const facts = $('#hero-facts');
-    facts.replaceChildren(
-      ...[
-        profile.location ? el('li', { text: `📍 ${profile.location}` }) : null,
-        profile.email ? el('li', { text: `✉ ${profile.email}` }) : null,
-        profile.phone ? el('li', { text: `☎ ${profile.phone}` }) : null,
-      ].filter(Boolean),
-    );
+    // "Currently" is derived rather than typed twice: whichever role is marked
+    // current, else the most recent one.
+    const jobs = profile.experience || [];
+    const currentJob = jobs.find((job) => job.current) || jobs[0] || null;
+
+    const specs = $('#specs');
+    if (specs) {
+      const cells = [
+        specCell('Based in', profile.location ? document.createTextNode(profile.location) : null),
+        specCell('Currently', currentJob && currentJob.role ? document.createTextNode(currentJob.role) : null),
+        specCell('Email', profile.email ? externalLink(`mailto:${profile.email}`, profile.email) : null),
+      ].filter(Boolean);
+      specs.replaceChildren(...cells);
+      specs.hidden = cells.length === 0;
+    }
+
+    const caption = $('#portrait-caption');
+    if (caption) {
+      const text = currentJob && currentJob.company ? currentJob.company : profile.location || '';
+      caption.textContent = text;
+      caption.hidden = !text;
+    }
 
     const socials = $('#socials');
-    socials.replaceChildren(
-      ...(profile.socials || [])
-        .map((social) => {
-          const link = externalLink(social.url, social.label);
-          if (!link) return null;
-          link.append(el('span', { text: '↗', attrs: { 'aria-hidden': 'true' } }));
-          return el('li', {}, link);
-        })
-        .filter(Boolean),
-    );
+    if (socials) {
+      socials.replaceChildren(
+        ...(profile.socials || [])
+          .map((social) => {
+            const link = externalLink(social.url, social.label);
+            if (!link) return null;
+            link.append(el('span', { text: '↗', attrs: { 'aria-hidden': 'true' } }));
+            return el('li', {}, link);
+          })
+          .filter(Boolean),
+      );
+    }
 
-    const meta = $('#about-meta');
-    const entries = [
-      ['Location', profile.location],
-      ['Email', profile.email],
-      ['Phone', profile.phone],
-      ['Website', profile.website],
-      ['Availability', profile.availability],
-    ].filter(([, value]) => Boolean(value));
-    meta.replaceChildren(
-      ...entries.map(([label, value]) =>
-        el('div', {}, [el('dt', { text: label }), el('dd', { text: value })]),
-      ),
-    );
-    meta.hidden = entries.length === 0;
+    // Vitals in the Profile block. Email is deliberately absent: the spec strip
+    // and the Contact block both carry it far more prominently.
+    const facts = $('#facts');
+    if (facts) {
+      const entries = [
+        ['Location', profile.location],
+        ['Availability', profile.availability],
+        ['Phone', profile.phone],
+        ['Website', profile.website],
+      ].filter(([, value]) => Boolean(value));
+      facts.replaceChildren(
+        ...entries.map(([label, value]) =>
+          el('div', {}, [el('dt', { text: label }), el('dd', { text: value })]),
+        ),
+      );
+      facts.hidden = entries.length === 0;
+    }
   }
 
   function renderMedia(profile) {
@@ -201,7 +239,7 @@
 
     const portrait = $('#portrait-img');
     const photo = safeHref(media.photo);
-    if (photo) {
+    if (portrait && photo) {
       portrait.src = photo;
       portrait.alt = profile.name ? `Portrait of ${profile.name}` : 'Profile photo';
       portrait.hidden = false;
@@ -209,8 +247,8 @@
     }
 
     const background = safeHref(media.background);
-    if (background) {
-      const bg = $('#hero-bg');
+    const bg = $('#masthead-bg');
+    if (background && bg) {
       const preload = new Image();
       preload.addEventListener('load', () => {
         bg.style.backgroundImage = `url("${background}")`;
@@ -234,9 +272,9 @@
 
     const linkFor = (entry) => (IS_STATIC ? safeHref(entry.path) : entry.route);
 
-    ['#cv-download', '#cv-download-2'].forEach((selector) => {
-      const button = $(selector);
-      if (!button) return;
+    // Every download control is marked up the same way, so adding one to the
+    // page needs no matching change here.
+    $$('[data-cv="primary"]').forEach((button) => {
       button.hidden = !primary;
       if (!primary) return;
 
@@ -245,21 +283,13 @@
       if (IS_STATIC) button.setAttribute('download', primary.name || 'cv');
 
       const label = $('[data-label]', button);
-      if (label) {
-        const base = selector === '#cv-download' ? 'Download CV' : 'Download my CV';
-        label.textContent = `${base} (${primary.format})`;
-      }
+      if (label) label.textContent = `${button.dataset.cvLabel || 'Download CV'} (${primary.format})`;
     });
 
-    [
-      ['#cv-alt-wrap', '#cv-alt'],
-      ['#cv-alt-wrap-2', '#cv-alt-2'],
-    ].forEach(([wrapSelector, linkSelector]) => {
-      const wrap = $(wrapSelector);
-      const link = $(linkSelector);
-      if (!wrap || !link) return;
-      wrap.hidden = !alternate;
-      if (!alternate) return;
+    $$('[data-cv-alt]').forEach((wrap) => {
+      const link = $('[data-cv-alt-link]', wrap);
+      wrap.hidden = !alternate || !link;
+      if (!alternate || !link) return;
 
       const href = linkFor(alternate);
       if (href) link.href = href;
@@ -280,18 +310,23 @@
     }
   }
 
+  function termList(items) {
+    return el(
+      'ul',
+      { className: 'terms' },
+      (items || []).filter(Boolean).map((item) => el('li', { className: 'term', text: item })),
+    );
+  }
+
+  /** Skills read as a spec sheet: discipline in the margin, terms beside it. */
   function renderSkills(profile) {
     const groups = (profile.skills || []).filter((group) => group.category || (group.items || []).length);
-    const grid = $('#skills-grid');
-    grid.replaceChildren(
+    const matrix = $('#skills-matrix');
+    matrix.replaceChildren(
       ...groups.map((group) =>
-        el('article', { className: 'skill-group' }, [
-          el('h3', { text: group.category || 'Skills' }),
-          el(
-            'ul',
-            { className: 'chips' },
-            (group.items || []).map((item) => el('li', { className: 'chip', text: item })),
-          ),
+        el('div', { className: 'matrix__row' }, [
+          el('dt', { className: 'matrix__label', text: group.category || 'Skills' }),
+          el('dd', { className: 'matrix__terms' }, [termList(group.items)]),
         ]),
       ),
     );
@@ -303,78 +338,92 @@
     const timeline = $('#timeline');
     timeline.replaceChildren(
       ...jobs.map((job) => {
-        const heading = el('h3', { className: 'timeline__role' }, [
-          document.createTextNode(job.role || ''),
-        ]);
-        if (job.company) {
-          heading.append(
-            document.createTextNode(job.role ? ' · ' : ''),
-            el('span', { className: 'timeline__company', text: job.company }),
-          );
-        }
-        if (job.current) {
-          heading.append(el('span', { className: 'badge', text: 'Current' }));
+        const when = [
+          el('span', { className: 'ledger__date', text: dateRange(job.start, job.end, job.current) }),
+          job.current ? el('span', { className: 'tag', text: 'Current' }) : null,
+        ].filter(Boolean);
+
+        const what = [
+          el('h3', { className: 'ledger__role', text: job.role || job.company || 'Role' }),
+          job.company || job.location
+            ? el('p', {
+                className: 'ledger__org',
+                text: [job.company, job.location].filter(Boolean).join(' · '),
+              })
+            : null,
+          job.summary ? el('p', { className: 'ledger__summary', text: job.summary }) : null,
+        ].filter(Boolean);
+
+        // A dozen bullets per role is a wall of text. Show a few, park the rest.
+        const bullets = (job.bullets || []).filter(Boolean);
+        if (bullets.length) {
+          const first = bullets.slice(0, BULLETS_SHOWN);
+          const rest = bullets.slice(BULLETS_SHOWN);
+          what.push(el('ul', { className: 'points' }, first.map((bullet) => el('li', { text: bullet }))));
+          if (rest.length) {
+            what.push(
+              el('details', { className: 'disclose' }, [
+                el('summary', { text: `${rest.length} more` }),
+                el('ul', { className: 'points' }, rest.map((bullet) => el('li', { text: bullet }))),
+              ]),
+            );
+          }
         }
 
-        const children = [
-          el('div', { className: 'timeline__top' }, [
-            heading,
-            el('span', { className: 'timeline__dates', text: dateRange(job.start, job.end, job.current) }),
-          ]),
-        ];
-        if (job.location) children.push(el('p', { className: 'timeline__meta', text: job.location }));
-        if (job.summary) children.push(el('p', { className: 'timeline__summary', text: job.summary }));
-        if ((job.bullets || []).length) {
-          children.push(
-            el(
-              'ul',
-              { className: 'bullets' },
-              job.bullets.map((bullet) => el('li', { text: bullet })),
-            ),
-          );
-        }
-        return el('li', { className: 'timeline__item' }, children);
+        return el('li', { className: 'ledger__row' }, [
+          el('div', { className: 'ledger__when' }, when),
+          el('div', { className: 'ledger__what' }, what),
+        ]);
       }),
     );
     show($('#experience'), jobs.length > 0);
   }
 
+  /** Projects as a numbered index; the numbers come from a CSS counter. */
   function renderProjects(profile) {
     const projects = profile.projects || [];
-    const cards = $('#project-cards');
-    cards.replaceChildren(
+    const list = $('#work-list');
+    list.replaceChildren(
       ...projects.map((project) => {
-        const title = el('h3', { className: 'card__title' }, [
+        const title = el('h3', { className: 'work__title' }, [
           document.createTextNode(project.title || 'Project'),
         ]);
-        if (project.highlight) title.append(el('span', { className: 'badge', text: 'Featured' }));
+        if (project.highlight) title.append(el('span', { className: 'tag', text: 'Featured' }));
 
-        const children = [title];
-        if (project.description) children.push(el('p', { className: 'card__desc', text: project.description }));
-        if ((project.tech || []).length) {
-          children.push(
-            el(
-              'ul',
-              { className: 'chips' },
-              project.tech.map((tech) => el('li', { className: 'chip', text: tech })),
-            ),
-          );
-        }
+        const body = [title];
+        if (project.description) body.push(el('p', { className: 'work__desc', text: project.description }));
+        if ((project.tech || []).length) body.push(termList(project.tech));
 
         const links = [
           externalLink(project.url, 'View project ↗'),
           externalLink(project.repo, 'Source code ↗'),
         ].filter(Boolean);
-        if (links.length) children.push(el('div', { className: 'card__links' }, links));
+        if (links.length) body.push(el('p', { className: 'work__links' }, links));
 
-        return el(
-          'article',
-          { className: `card${project.highlight ? ' card--highlight' : ''}` },
-          children,
-        );
+        return el('li', { className: 'work__item' }, [el('div', { className: 'work__body' }, body)]);
       }),
     );
     show($('#projects'), projects.length > 0);
+  }
+
+  /** One ledger row: dates on the left, everything else on the right. */
+  function ledgerRow(date, title, org, extra) {
+    return el('li', { className: 'ledger__row' }, [
+      el(
+        'div',
+        { className: 'ledger__when' },
+        date ? [el('span', { className: 'ledger__date', text: date })] : [],
+      ),
+      el(
+        'div',
+        { className: 'ledger__what' },
+        [
+          el('h3', { className: 'ledger__role', text: title }),
+          org ? el('p', { className: 'ledger__org', text: org }) : null,
+          extra || null,
+        ].filter(Boolean),
+      ),
+    ]);
   }
 
   function renderBackground(profile) {
@@ -383,32 +432,45 @@
 
     const eduList = $('#education-list');
     eduList.replaceChildren(
-      ...(education.length ? [el('p', { className: 'stack__title', text: 'Education' })] : []),
-      ...education.map((item) =>
-        el('article', { className: 'entry' }, [
-          el('h3', { text: item.degree || item.school }),
-          item.degree && item.school ? el('p', { className: 'entry__sub', text: item.school }) : null,
-          el('p', {
-            className: 'entry__meta',
-            text: [dateRange(item.start, item.end, false), item.location].filter(Boolean).join(' · '),
-          }),
-          item.details ? el('p', { className: 'entry__body', text: item.details }) : null,
-        ].filter(Boolean)),
-      ),
+      ...(education.length
+        ? [
+            el('p', { className: 'eyebrow', text: 'Education' }),
+            el(
+              'ul',
+              { className: 'ledger ledger--tight' },
+              education.map((item) =>
+                ledgerRow(
+                  dateRange(item.start, item.end, false),
+                  item.degree || item.school || 'Education',
+                  [item.degree ? item.school : '', item.location].filter(Boolean).join(' · '),
+                  item.details ? el('p', { className: 'ledger__summary', text: item.details }) : null,
+                ),
+              ),
+            ),
+          ]
+        : []),
     );
 
     const certList = $('#certification-list');
     certList.replaceChildren(
-      ...(certifications.length ? [el('p', { className: 'stack__title', text: 'Certifications' })] : []),
-      ...certifications.map((item) => {
-        const link = externalLink(item.url, 'Verify ↗');
-        return el('article', { className: 'entry' }, [
-          el('h3', { text: item.name }),
-          item.issuer ? el('p', { className: 'entry__sub', text: item.issuer }) : null,
-          item.year ? el('p', { className: 'entry__meta', text: item.year }) : null,
-          link ? el('p', { className: 'entry__body' }, link) : null,
-        ].filter(Boolean));
-      }),
+      ...(certifications.length
+        ? [
+            el('p', { className: 'eyebrow', text: 'Certifications' }),
+            el(
+              'ul',
+              { className: 'ledger ledger--tight' },
+              certifications.map((item) => {
+                const link = externalLink(item.url, 'Verify ↗');
+                return ledgerRow(
+                  item.year || '',
+                  item.name || 'Certification',
+                  item.issuer || '',
+                  link ? el('p', { className: 'work__links' }, link) : null,
+                );
+              }),
+            ),
+          ]
+        : []),
     );
 
     show($('#education'), education.length > 0 || certifications.length > 0);
@@ -418,36 +480,18 @@
     const languages = profile.languages || [];
     const interests = profile.interests || [];
 
-    const langList = $('#language-list');
-    langList.replaceChildren(
+    $('#language-list').replaceChildren(
       ...(languages.length
         ? [
-            el('p', { className: 'stack__title', text: 'Languages' }),
-            el(
-              'ul',
-              { className: 'chips' },
-              languages.map((lang) =>
-                el('li', {
-                  className: 'chip',
-                  text: lang.level ? `${lang.name} — ${lang.level}` : lang.name,
-                }),
-              ),
-            ),
+            el('p', { className: 'eyebrow', text: 'Languages' }),
+            termList(languages.map((lang) => (lang.level ? `${lang.name} — ${lang.level}` : lang.name))),
           ]
         : []),
     );
 
-    const interestList = $('#interest-list');
-    interestList.replaceChildren(
+    $('#interest-list').replaceChildren(
       ...(interests.length
-        ? [
-            el('p', { className: 'stack__title', text: 'Interests' }),
-            el(
-              'ul',
-              { className: 'chips' },
-              interests.map((interest) => el('li', { className: 'chip', text: interest })),
-            ),
-          ]
+        ? [el('p', { className: 'eyebrow', text: 'Interests' }), termList(interests)]
         : []),
     );
 
@@ -455,16 +499,65 @@
   }
 
   function renderContact(profile) {
-    const links = [
-      profile.email ? externalLink(`mailto:${profile.email}`, `✉ ${profile.email}`) : null,
-      profile.phone ? externalLink(`tel:${profile.phone.replace(/\s+/g, '')}`, `☎ ${profile.phone}`) : null,
-      profile.website ? externalLink(profile.website, '🌐 Website') : null,
-      ...(profile.socials || []).map((social) => externalLink(social.url, social.label)),
+    // The email is the headline of this block, so it is not repeated in the rows.
+    const mail = $('#contact-email');
+    if (mail) {
+      mail.hidden = !profile.email;
+      if (profile.email) {
+        mail.href = `mailto:${profile.email}`;
+        mail.textContent = profile.email;
+      }
+    }
+
+    const rows = [
+      profile.phone ? ['Phone', `tel:${profile.phone.replace(/\s+/g, '')}`, profile.phone] : null,
+      profile.website ? ['Website', profile.website, prettyUrl(profile.website)] : null,
+      ...(profile.socials || []).map((social) =>
+        social && social.url ? [social.label || 'Profile', social.url, prettyUrl(social.url)] : null,
+      ),
     ].filter(Boolean);
 
-    $('#contact-links').replaceChildren(...links.map((link) => el('li', {}, link)));
+    const built = rows
+      .map(([label, url, value]) => {
+        const link = externalLink(url, value, 'reach__v');
+        if (!link) return null;
+        return el('li', {}, [el('span', { className: 'reach__k', text: label }), link]);
+      })
+      .filter(Boolean);
+
+    const list = $('#reach-list');
+    if (list) {
+      list.replaceChildren(...built);
+      list.hidden = built.length === 0;
+    }
+
     const cta = $('#contact-cta');
-    if (cta) cta.hidden = links.length === 0;
+    if (cta) cta.hidden = !profile.email && built.length === 0;
+  }
+
+  /**
+   * Numbers the section index and the block headings from the same count, and
+   * drops index entries whose section has no content — so the navigation never
+   * offers a link to an empty page region.
+   */
+  function syncIndex() {
+    let position = 0;
+    $$('#nav-list a').forEach((link) => {
+      const href = link.getAttribute('href') || '';
+      const section = href.startsWith('#') ? document.getElementById(href.slice(1)) : null;
+      const item = link.closest('li');
+      const visible = Boolean(section) && !section.hidden;
+
+      if (item) item.hidden = !visible;
+      if (!visible) return;
+
+      position += 1;
+      const numbered = String(position).padStart(2, '0');
+      const badge = $('.index__num', link);
+      if (badge) badge.textContent = numbered;
+      const heading = $('.block__num', section);
+      if (heading) heading.textContent = numbered;
+    });
   }
 
   function render(profile) {
@@ -476,46 +569,56 @@
     renderBackground(profile);
     renderExtras(profile);
     renderContact(profile);
+    syncIndex();
     document.body.dataset.loaded = 'true';
   }
 
   /* ---------- interactions ---------- */
 
   function initNav() {
-    const nav = $('.nav');
+    const index = $('#index');
     const toggle = $('#nav-toggle');
 
     toggle?.addEventListener('click', () => {
-      const open = nav.classList.toggle('is-open');
+      const open = index.classList.toggle('is-open');
       toggle.setAttribute('aria-expanded', String(open));
-      toggle.setAttribute('aria-label', open ? 'Close menu' : 'Open menu');
+      toggle.setAttribute('aria-label', open ? 'Close section index' : 'Open section index');
     });
 
-    $$('.nav__list a').forEach((link) => {
+    $$('#nav-list a').forEach((link) => {
       link.addEventListener('click', () => {
-        nav.classList.remove('is-open');
+        index.classList.remove('is-open');
         toggle?.setAttribute('aria-expanded', 'false');
       });
     });
 
-    const topbar = $('#topbar');
+    const bar = $('#bar');
     const progress = $('#scroll-progress');
-    const heroName = $('.hero__name');
-    const onScroll = () => {
-      topbar.classList.toggle('is-stuck', window.scrollY > 8);
+    const mastheadName = $('#masthead-name');
 
-      // Reveal the topbar wordmark only once the hero name is behind the header,
-      // so the name is never shown twice at the same time.
-      const hidden = heroName
-        ? heroName.getBoundingClientRect().bottom <= topbar.offsetHeight
+    const onScroll = () => {
+      bar.classList.toggle('is-stuck', window.scrollY > 8);
+
+      // Reveal the bar wordmark only once the masthead name is behind the bar,
+      // so the name is never shown twice at the same size.
+      const passed = mastheadName
+        ? mastheadName.getBoundingClientRect().bottom <= bar.offsetHeight
         : window.scrollY > 8;
-      topbar.classList.toggle('is-past-hero', hidden);
+      bar.classList.toggle('is-past-masthead', passed);
+
+      // Above the first section nothing is "current", so the scroll spy's last
+      // active entry is cleared rather than left highlighted.
+      const firstBlock = $('.block:not([hidden])');
+      if (firstBlock && firstBlock.getBoundingClientRect().top > window.innerHeight * 0.55) {
+        $$('#nav-list a.is-active').forEach((link) => link.classList.remove('is-active'));
+      }
 
       const height = document.documentElement.scrollHeight - window.innerHeight;
       const ratio = height > 0 ? Math.min(1, window.scrollY / height) : 0;
       progress.style.width = `${(ratio * 100).toFixed(2)}%`;
     };
     window.addEventListener('scroll', onScroll, { passive: true });
+    window.addEventListener('resize', onScroll);
     onScroll();
   }
 
@@ -534,11 +637,11 @@
           }
         });
       },
-      { rootMargin: '0px 0px -10% 0px', threshold: 0.08 },
+      { rootMargin: '0px 0px -8% 0px', threshold: 0.05 },
     );
     $$('.reveal').forEach((node) => revealer.observe(node));
 
-    const links = $$('.nav__list a');
+    const links = $$('#nav-list a');
     const spy = new IntersectionObserver(
       (entries) => {
         entries.forEach((entry) => {
@@ -556,12 +659,36 @@
     });
   }
 
+  /**
+   * Bullets parked behind a disclosure still belong on a printed CV, so they
+   * are opened for the print run and put back afterwards.
+   */
+  function initPrint() {
+    const forced = new Set();
+
+    window.addEventListener('beforeprint', () => {
+      $$('details.disclose').forEach((node) => {
+        if (node.open) return;
+        node.open = true;
+        forced.add(node);
+      });
+    });
+
+    window.addEventListener('afterprint', () => {
+      forced.forEach((node) => {
+        node.open = false;
+      });
+      forced.clear();
+    });
+  }
+
   /* ---------- boot ---------- */
 
   async function boot() {
     const prefersLight = window.matchMedia && window.matchMedia('(prefers-color-scheme: light)').matches;
     initTheme(prefersLight ? 'light' : 'dark');
     initNav();
+    initPrint();
     $('#footer-year').textContent = String(new Date().getFullYear());
 
     try {
