@@ -12,167 +12,261 @@
   <body>
     <a class="skip-link" href="#main">Skip to content</a>
 
-    <header class="topbar" id="topbar">
-      <div class="topbar__inner">
-        <a class="brand" id="brand" href="#top" aria-label="Back to top">
-          <span class="brand__mark brand__mark--monogram" id="brand-monogram" aria-hidden="true"></span>
-          <span class="brand__name" data-bind="name" aria-hidden="true"></span>
+    <!-- ============================================================
+         Index bar: monogram, numbered section index, CV, theme
+         ============================================================ -->
+    <header class="bar" id="bar">
+      <div class="bar__inner">
+        <a class="mark" id="brand" href="#top">
+          <span class="mark__glyph" id="brand-monogram" aria-hidden="true"></span>
+          <span class="mark__name" data-bind="name" aria-hidden="true"></span>
         </a>
 
-        <nav class="nav" aria-label="Sections">
-          <ul class="nav__list" id="nav-list">
-            <li><a href="#about">About</a></li>
-            <li><a href="#skills">Skills</a></li>
-            <li><a href="#experience">Experience</a></li>
-            <li><a href="#projects">Projects</a></li>
-            <li><a href="#education">Education</a></li>
-            <li><a href="#contact">Contact</a></li>
+        <nav class="index" id="index" aria-label="Sections">
+          <ul class="index__list" id="nav-list">
+            <li>
+              <a href="#about"><span class="index__num" aria-hidden="true"></span>Profile</a>
+            </li>
+            <li>
+              <a href="#skills"><span class="index__num" aria-hidden="true"></span>Capabilities</a>
+            </li>
+            <li>
+              <a href="#experience"><span class="index__num" aria-hidden="true"></span>Experience</a>
+            </li>
+            <li>
+              <a href="#projects"><span class="index__num" aria-hidden="true"></span>Selected work</a>
+            </li>
+            <li>
+              <a href="#education"><span class="index__num" aria-hidden="true"></span>Credentials</a>
+            </li>
+            <li>
+              <a href="#extras"><span class="index__num" aria-hidden="true"></span>Beyond work</a>
+            </li>
+            <li>
+              <a href="#contact"><span class="index__num" aria-hidden="true"></span>Contact</a>
+            </li>
           </ul>
         </nav>
 
-        <div class="topbar__actions">
+        <div class="bar__actions">
+          <a class="btn btn--ghost bar__cv" data-cv="primary" data-cv-label="CV" href="/cv" hidden>
+            <span data-label>CV</span>
+            <span aria-hidden="true">↓</span>
+          </a>
           <button class="icon-btn" id="theme-toggle" type="button" aria-label="Switch colour theme" aria-pressed="false">
-            <span class="icon-btn__icon" id="theme-icon" aria-hidden="true">◐</span>
+            <span id="theme-icon" aria-hidden="true">☾</span>
           </button>
-          <button class="icon-btn nav-toggle" id="nav-toggle" type="button" aria-label="Open menu" aria-expanded="false" aria-controls="nav-list">
+          <button
+            class="icon-btn bar__toggle"
+            id="nav-toggle"
+            type="button"
+            aria-label="Open section index"
+            aria-expanded="false"
+            aria-controls="nav-list"
+          >
             <span aria-hidden="true">☰</span>
           </button>
         </div>
       </div>
-      <div class="scroll-progress" id="scroll-progress" aria-hidden="true"></div>
+      <div class="bar__progress" id="scroll-progress" aria-hidden="true"></div>
     </header>
 
     <main id="main">
       <span id="top" class="anchor"></span>
 
-      <!-- Hero -->
-      <section class="hero" id="hero">
-        <div class="hero__bg" id="hero-bg" aria-hidden="true"></div>
-        <div class="hero__inner">
-          <div class="hero__text">
-            <p class="hero__status" id="availability" hidden></p>
-            <h1 class="hero__name" data-bind="name">Loading…</h1>
-            <p class="hero__headline" data-bind="headline"></p>
-            <p class="hero__tagline" data-bind="tagline"></p>
+      <!-- ============================================================
+           Masthead
+           ============================================================ -->
+      <section class="masthead" aria-labelledby="masthead-name">
+        <div class="masthead__bg" id="masthead-bg" aria-hidden="true"></div>
 
-            <ul class="hero__facts" id="hero-facts"></ul>
+        <div class="wrap masthead__inner">
+          <p class="kicker" id="availability" hidden></p>
 
-            <div class="hero__cta">
-              <a class="btn btn--primary" id="cv-download" href="/cv" hidden>
-                <span aria-hidden="true">↓</span> <span data-label>Download CV</span>
-              </a>
-              <a class="btn btn--ghost" id="contact-cta" href="#contact">Get in touch</a>
+          <h1 class="masthead__name" id="masthead-name" data-bind="name">Loading…</h1>
+          <p class="masthead__role" data-bind="headline"></p>
+
+          <div class="masthead__grid">
+            <div class="masthead__lead">
+              <p class="lead" data-bind="tagline"></p>
+
+              <div>
+                <div class="cta">
+                  <a class="btn btn--primary" data-cv="primary" data-cv-label="Download CV" href="/cv" hidden>
+                    <span data-label>Download CV</span>
+                    <span aria-hidden="true">↓</span>
+                  </a>
+                  <a class="btn btn--ghost" id="contact-cta" href="#contact">
+                    Get in touch <span aria-hidden="true">→</span>
+                  </a>
+                </div>
+                <p class="footnote" data-cv-alt hidden>
+                  Also available as <a data-cv-alt-link href="/cv/docx">Word document</a>
+                </p>
+              </div>
+
+              <ul class="social" id="socials" aria-label="Profiles elsewhere"></ul>
             </div>
-            <p class="cv-alt" id="cv-alt-wrap" hidden>
-              Also available as <a id="cv-alt" href="/cv/docx">Word document</a>
+
+            <figure class="shot">
+              <div class="shot__frame">
+                <img id="portrait-img" alt="" hidden />
+                <span class="shot__initials" id="portrait-initials" aria-hidden="true"></span>
+              </div>
+              <figcaption class="shot__cap" id="portrait-caption" hidden></figcaption>
+            </figure>
+          </div>
+
+          <dl class="specs" id="specs"></dl>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           01 — Profile
+           ============================================================ -->
+      <section class="block reveal" id="about" aria-labelledby="about-title">
+        <div class="wrap block__grid">
+          <div class="block__aside">
+            <p class="block__num" aria-hidden="true"></p>
+            <h2 class="block__title" id="about-title">Profile</h2>
+          </div>
+          <div class="block__body">
+            <p class="prose" data-bind="summary"></p>
+            <dl class="facts" id="facts"></dl>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           02 — Capabilities
+           ============================================================ -->
+      <section class="block reveal" id="skills" aria-labelledby="skills-title" hidden>
+        <div class="wrap block__grid">
+          <div class="block__aside">
+            <p class="block__num" aria-hidden="true"></p>
+            <h2 class="block__title" id="skills-title">Capabilities</h2>
+            <p class="block__note">Grouped by discipline.</p>
+          </div>
+          <div class="block__body">
+            <dl class="matrix" id="skills-matrix"></dl>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           03 — Experience
+           ============================================================ -->
+      <section class="block reveal" id="experience" aria-labelledby="experience-title" hidden>
+        <div class="wrap block__grid">
+          <div class="block__aside">
+            <p class="block__num" aria-hidden="true"></p>
+            <h2 class="block__title" id="experience-title">Experience</h2>
+            <p class="block__note">Most recent first.</p>
+          </div>
+          <div class="block__body">
+            <ol class="ledger" id="timeline"></ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           04 — Selected work
+           ============================================================ -->
+      <section class="block reveal" id="projects" aria-labelledby="projects-title" hidden>
+        <div class="wrap block__grid">
+          <div class="block__aside">
+            <p class="block__num" aria-hidden="true"></p>
+            <h2 class="block__title" id="projects-title">Selected work</h2>
+          </div>
+          <div class="block__body">
+            <ol class="work" id="work-list"></ol>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           05 — Credentials
+           ============================================================ -->
+      <section class="block reveal" id="education" aria-labelledby="education-title" hidden>
+        <div class="wrap block__grid">
+          <div class="block__aside">
+            <p class="block__num" aria-hidden="true"></p>
+            <h2 class="block__title" id="education-title">Credentials</h2>
+          </div>
+          <div class="block__body">
+            <div class="pair">
+              <div id="education-list"></div>
+              <div id="certification-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           06 — Beyond work
+           ============================================================ -->
+      <section class="block reveal" id="extras" aria-labelledby="extras-title" hidden>
+        <div class="wrap block__grid">
+          <div class="block__aside">
+            <p class="block__num" aria-hidden="true"></p>
+            <h2 class="block__title" id="extras-title">Beyond work</h2>
+          </div>
+          <div class="block__body">
+            <div class="pair">
+              <div id="language-list"></div>
+              <div id="interest-list"></div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============================================================
+           07 — Contact
+           ============================================================ -->
+      <section class="block reveal" id="contact" aria-labelledby="contact-title">
+        <div class="wrap block__grid">
+          <div class="block__aside">
+            <p class="block__num" aria-hidden="true"></p>
+            <h2 class="block__title" id="contact-title">Contact</h2>
+          </div>
+          <div class="block__body">
+            <p class="lead">
+              Email is the quickest way to reach me. I read everything that comes in.
             </p>
 
-            <ul class="socials" id="socials" aria-label="Social profiles"></ul>
-          </div>
+            <a class="mailto" id="contact-email" href="#" hidden></a>
 
-          <div class="hero__portrait">
-            <div class="portrait" id="portrait">
-              <img id="portrait-img" alt="" hidden />
-              <span class="portrait__initials" id="portrait-initials" aria-hidden="true"></span>
+            <ul class="reach" id="reach-list"></ul>
+
+            <div>
+              <div class="cta">
+                <a class="btn btn--primary" data-cv="primary" data-cv-label="Download my CV" href="/cv" hidden>
+                  <span data-label>Download my CV</span>
+                  <span aria-hidden="true">↓</span>
+                </a>
+              </div>
+              <p class="footnote" data-cv-alt hidden>
+                Also available as <a data-cv-alt-link href="/cv/docx">Word document</a>
+              </p>
             </div>
           </div>
-        </div>
-        <a class="hero__scroll" href="#about" aria-label="Scroll to about section"><span aria-hidden="true">⌄</span></a>
-      </section>
-
-      <!-- About -->
-      <section class="section reveal" id="about" aria-labelledby="about-title">
-        <div class="section__head">
-          <p class="section__eyebrow">01 — About</p>
-          <h2 class="section__title" id="about-title">A quick introduction</h2>
-        </div>
-        <div class="about">
-          <p class="about__summary" data-bind="summary"></p>
-          <dl class="about__meta" id="about-meta"></dl>
-        </div>
-      </section>
-
-      <!-- Skills -->
-      <section class="section reveal" id="skills" aria-labelledby="skills-title" hidden>
-        <div class="section__head">
-          <p class="section__eyebrow">02 — Skills</p>
-          <h2 class="section__title" id="skills-title">What I work with</h2>
-        </div>
-        <div class="skills" id="skills-grid"></div>
-      </section>
-
-      <!-- Experience -->
-      <section class="section reveal" id="experience" aria-labelledby="experience-title" hidden>
-        <div class="section__head">
-          <p class="section__eyebrow">03 — Experience</p>
-          <h2 class="section__title" id="experience-title">Where I have worked</h2>
-        </div>
-        <ol class="timeline" id="timeline"></ol>
-      </section>
-
-      <!-- Projects -->
-      <section class="section reveal" id="projects" aria-labelledby="projects-title" hidden>
-        <div class="section__head">
-          <p class="section__eyebrow">04 — Projects</p>
-          <h2 class="section__title" id="projects-title">Things I have built</h2>
-        </div>
-        <div class="cards" id="project-cards"></div>
-      </section>
-
-      <!-- Education + certifications -->
-      <section class="section reveal" id="education" aria-labelledby="education-title" hidden>
-        <div class="section__head">
-          <p class="section__eyebrow">05 — Background</p>
-          <h2 class="section__title" id="education-title">Education &amp; certifications</h2>
-        </div>
-        <div class="split">
-          <div id="education-list" class="stack"></div>
-          <div id="certification-list" class="stack"></div>
-        </div>
-      </section>
-
-      <!-- Extras -->
-      <section class="section reveal" id="extras" aria-labelledby="extras-title" hidden>
-        <div class="section__head">
-          <p class="section__eyebrow">06 — Also</p>
-          <h2 class="section__title" id="extras-title">Languages &amp; interests</h2>
-        </div>
-        <div class="split">
-          <div class="stack" id="language-list"></div>
-          <div class="stack" id="interest-list"></div>
-        </div>
-      </section>
-
-      <!-- Contact -->
-      <section class="section section--contact reveal" id="contact" aria-labelledby="contact-title">
-        <div class="contact">
-          <p class="section__eyebrow">07 — Contact</p>
-          <h2 class="section__title" id="contact-title">Let's talk</h2>
-          <p class="contact__lead">
-            The quickest way to reach me is by email. I read everything that comes in.
-          </p>
-          <ul class="contact__links" id="contact-links"></ul>
-          <a class="btn btn--primary" id="cv-download-2" href="/cv" hidden>
-            <span aria-hidden="true">↓</span> <span data-label>Download my CV</span>
-          </a>
-          <p class="cv-alt" id="cv-alt-wrap-2" hidden>
-            Also available as <a id="cv-alt-2" href="/cv/docx">Word document</a>
-          </p>
         </div>
       </section>
     </main>
 
-    <footer class="footer">
-      <p>
-        <span data-bind="name"></span>
-        <span class="footer__dot" aria-hidden="true">·</span>
-        <span id="footer-year"></span>
-      </p>
-      <p class="footer__meta">
-        <a href="/admin" rel="nofollow">Admin</a>
-        <span class="footer__dot" aria-hidden="true">·</span>
-        <span id="footer-updated"></span>
-      </p>
+    <footer class="foot">
+      <div class="wrap foot__inner">
+        <p class="foot__left">
+          <span data-bind="name"></span>
+          <span class="footer__dot" aria-hidden="true">·</span>
+          <span id="footer-year"></span>
+        </p>
+        <p class="foot__right">
+          <a href="/admin" rel="nofollow">Admin</a>
+          <span class="footer__dot" aria-hidden="true">·</span>
+          <span id="footer-updated"></span>
+        </p>
+      </div>
     </footer>
 
     <div class="toast" id="toast" role="status" aria-live="polite" hidden></div>
